@@ -1,0 +1,17 @@
+# Core scientific & ML libraries
+numpy>=2.3.0
+pandas>=2.3.0
+scikit-learn>=1.7.0
+xgboost>=3.0.2
+joblib>=1.5.1
+
+# Visualization
+matplotlib>=3.10.3
+seaborn>=0.13.2
+plotly>=6.1.2
+
+# Web app framework
+streamlit>=1.45.1
+
+# Database
+psycopg2-binary>=2.9.10
