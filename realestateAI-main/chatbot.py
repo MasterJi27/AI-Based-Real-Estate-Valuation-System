@@ -3,6 +3,10 @@ import re
 import random
 from datetime import datetime
 from typing import Dict, List, Tuple
+from secure_regex import (
+    extract_safe_bhk, extract_safe_area, extract_safe_budget, 
+    extract_safe_city, SAFE_PATTERNS, SecureRegex
+)
 
 class RealEstateChatbot:
     def __init__(self, data_loader=None, predictor=None, combined_data=None):
@@ -77,53 +81,40 @@ class RealEstateChatbot:
         }
 
     def classify_intent(self, user_input: str) -> str:
-        """Classify user intent based on input patterns"""
+        """Classify user intent based on input patterns using secure regex"""
         user_input = user_input.lower().strip()
+        
+        # Limit input length for security
+        if len(user_input) > 500:
+            user_input = user_input[:500]
         
         for intent, patterns in self.intent_patterns.items():
             for pattern in patterns:
-                if re.search(pattern, user_input, re.IGNORECASE):
+                # Use secure regex with timeout protection
+                if SecureRegex.safe_search(pattern, user_input, re.IGNORECASE, timeout=1):
                     return intent
         return 'default'
 
-    def extract_property_details(self, user_input: str) -> Dict:
-        """Extract property details from user input"""
+    def extract_basic_info(self, user_input: str) -> Dict:
+        """Extract basic property information from user input using secure regex"""
         details = {}
-        user_input = user_input.lower()
         
-        # Extract city
-        cities = ['mumbai', 'delhi', 'bangalore', 'gurugram', 'noida']
-        for city in cities:
-            if city in user_input:
-                details['city'] = city.title()
-                break
-        
-        # Extract BHK
-        bhk_match = re.search(r'(\d+)\s*bhk', user_input)
-        if bhk_match:
-            details['bhk'] = int(bhk_match.group(1))
-        
-        # Extract area
-        area_match = re.search(r'(\d+)\s*(sqft|sq\.ft|square feet)', user_input)
-        if area_match:
-            details['area'] = int(area_match.group(1))
-        
-        # Extract budget
-        budget_match = re.search(r'(\d+)\s*(lakh|crore)', user_input)
-        if budget_match:
-            amount = int(budget_match.group(1))
-            unit = budget_match.group(2).lower()
-            if unit == 'lakh':
-                details['budget'] = amount * 100000
-            elif unit == 'crore':
-                details['budget'] = amount * 10000000
-        
-        # Extract property type
-        property_types = ['apartment', 'villa', 'house', 'studio', 'penthouse']
-        for prop_type in property_types:
-            if prop_type in user_input:
-                details['property_type'] = prop_type.title()
-                break
+        # Use secure extraction methods
+        city = extract_safe_city(user_input)
+        if city:
+            details['city'] = city
+            
+        bhk = extract_safe_bhk(user_input)
+        if bhk:
+            details['bhk'] = bhk
+            
+        area = extract_safe_area(user_input)
+        if area:
+            details['area'] = area
+            
+        budget = extract_safe_budget(user_input)
+        if budget:
+            details['budget'] = budget
         
         return details
 
@@ -216,8 +207,9 @@ class RealEstateChatbot:
             return insights
         
         elif intent == 'emi':
-            # Try to extract numbers for EMI calculation
-            numbers = re.findall(r'\d+\.?\d*', user_input)
+            # Try to extract numbers for EMI calculation using secure method
+            from secure_regex import extract_safe_numbers
+            numbers = extract_safe_numbers(user_input, max_numbers=5)
             if len(numbers) >= 3:
                 try:
                     principal = float(numbers[0]) * (1000000 if float(numbers[0]) < 100 else 1)  # Assume millions if small number
@@ -302,42 +294,25 @@ class RealEstateChatbot:
             return "I'm having trouble processing your request. Please try again or be more specific!"
 
     def extract_property_details(self, text: str) -> Dict:
-        """Extract property details from user input"""
+        """Extract property details from user input using secure regex"""
         details = {}
-        text_lower = text.lower()
         
-        # Extract budget
-        budget_patterns = [
-            r'budget.*?(\d+).*?(?:lakh|crore|cr|l)',
-            r'(\d+).*?(?:lakh|crore|cr|l)',
-            r'under.*?(\d+)',
-            r'up to.*?(\d+)',
-            r'around.*?(\d+)'
-        ]
-        
-        for pattern in budget_patterns:
-            match = re.search(pattern, text_lower)
-            if match:
-                amount = int(match.group(1))
-                if 'crore' in text_lower or 'cr' in text_lower:
-                    details['budget'] = amount * 10000000
-                elif 'lakh' in text_lower or 'l' in text_lower:
-                    details['budget'] = amount * 100000
-                else:
-                    details['budget'] = amount * 100000  # Default to lakh
-                break
-        
-        # Extract BHK
-        bhk_match = re.search(r'(\d+)\s*bhk', text_lower)
-        if bhk_match:
-            details['bhk'] = int(bhk_match.group(1))
-        
-        # Extract city
-        cities = ['mumbai', 'delhi', 'bangalore', 'gurugram', 'noida']
-        for city in cities:
-            if city in text_lower:
-                details['city'] = city
-                break
+        # Use secure extraction methods
+        bhk = extract_safe_bhk(text)
+        if bhk:
+            details['bhk'] = bhk
+            
+        area = extract_safe_area(text)
+        if area:
+            details['area'] = area
+            
+        budget = extract_safe_budget(text)
+        if budget:
+            details['budget'] = budget
+            
+        city = extract_safe_city(text)
+        if city:
+            details['city'] = city
         
         return details
 

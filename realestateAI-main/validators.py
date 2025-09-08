@@ -90,9 +90,9 @@ class InputValidator:
         if len(message) > 500:
             return False, "Message too long. Maximum 500 characters allowed"
         
-        # Check for potential malicious content
+        # Check for potential malicious content (Fixed: Avoid polynomial regex)
         suspicious_patterns = [
-            r'<script[^>]*>.*?</script>',
+            r'<script[^>]*>[^<]*</script>',  # Fixed: More specific pattern
             r'javascript:',
             r'on\w+\s*=',
             r'eval\s*\(',
