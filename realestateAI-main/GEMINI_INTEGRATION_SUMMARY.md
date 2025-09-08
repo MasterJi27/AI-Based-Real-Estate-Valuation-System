@@ -20,7 +20,7 @@ Successfully integrated Google Gemini 2.5 API with the AI Real Estate Valuation 
 #### Updated Configuration (`config.py`)
 ```python
 AI_CONFIG = {
-    'gemini_api_key': 'AIzaSyDrbHwhQMxa7P4cofI1QTIP0EAU25KmJz4',
+    'gemini_api_key': os.getenv('GEMINI_API_KEY', ''),  # Secure environment variable
     'enable_gemini_ai': True,
     'gemini_model': 'gemini-1.5-flash',  # Optimized for rate limits
     'ai_response_timeout': 30,

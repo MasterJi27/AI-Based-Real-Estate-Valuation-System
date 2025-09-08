@@ -3,6 +3,10 @@ Production Configuration for Real Estate AI System
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Config:
     """Base configuration"""
@@ -76,7 +80,7 @@ class Config:
     
     # AI Integration Settings
     AI_CONFIG = {
-        'gemini_api_key': 'AIzaSyDrbHwhQMxa7P4cofI1QTIP0EAU25KmJz4',
+        'gemini_api_key': os.getenv('GEMINI_API_KEY', ''),
         'enable_gemini_ai': True,
         'gemini_model': 'gemini-1.5-flash',  # Changed to flash for better rate limits
         'ai_response_timeout': 30,

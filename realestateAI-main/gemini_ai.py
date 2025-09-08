@@ -338,8 +338,16 @@ def get_gemini_service() -> Optional[GeminiAIService]:
 def test_gemini_integration():
     """Test Gemini AI integration"""
     try:
-        # Test with a sample API key (replace with actual key)
-        test_key = "AIzaSyDrbHwhQMxa7P4cofI1QTIP0EAU25KmJz4"
+        # Test with environment variable API key
+        import os
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        test_key = os.getenv('GEMINI_API_KEY', '')
+        if not test_key:
+            print("❌ No API key found in environment variables")
+            return False
+            
         service = GeminiAIService(test_key)
         
         # Test property analysis
