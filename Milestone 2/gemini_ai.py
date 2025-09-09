@@ -29,7 +29,12 @@ class GeminiAIService:
     
     def __init__(self, api_key: str = None):
         """Initialize Gemini AI service with secure API key handling"""
-        self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
+        # Try multiple sources for API key
+        self.api_key = (
+            api_key or 
+            st.secrets.get("GOOGLE_API_KEY") or 
+            os.getenv('GOOGLE_API_KEY')
+        )
         
         if not self.api_key:
             logger.error("Google API key not provided")
