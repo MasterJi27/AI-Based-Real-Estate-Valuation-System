@@ -3,10 +3,44 @@ import re
 import random
 from datetime import datetime
 from typing import Dict, List, Tuple
-from secure_regex import (
-    extract_safe_bhk, extract_safe_area, extract_safe_budget, 
-    extract_safe_city, SAFE_PATTERNS, SecureRegex
-)
+
+# Simple regex functions to replace secure_regex
+def extract_safe_bhk(text):
+    """Extract BHK information from text"""
+    match = re.search(r'(\d+)\s*(?:bhk|bedroom)', text.lower())
+    return int(match.group(1)) if match else None
+
+def extract_safe_area(text):
+    """Extract area information from text"""
+    match = re.search(r'(\d+)\s*(?:sq\s*ft|sqft|square\s*feet)', text.lower())
+    return int(match.group(1)) if match else None
+
+def extract_safe_budget(text):
+    """Extract budget information from text"""
+    # Look for numbers with crore, lakh, etc.
+    patterns = [
+        r'(\d+(?:\.\d+)?)\s*crore',
+        r'(\d+(?:\.\d+)?)\s*lakh',
+        r'(\d+(?:\.\d+)?)\s*lac'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text.lower())
+        if match:
+            amount = float(match.group(1))
+            if 'crore' in pattern:
+                return amount * 10000000
+            elif 'lakh' in pattern or 'lac' in pattern:
+                return amount * 100000
+    return None
+
+def extract_safe_city(text):
+    """Extract city information from text"""
+    cities = ['mumbai', 'delhi', 'bangalore', 'gurugram', 'noida', 'pune', 'chennai']
+    text_lower = text.lower()
+    for city in cities:
+        if city in text_lower:
+            return city.title()
+    return None
 
 class RealEstateChatbot:
     def __init__(self, data_loader=None, predictor=None, combined_data=None):
@@ -90,8 +124,8 @@ class RealEstateChatbot:
         
         for intent, patterns in self.intent_patterns.items():
             for pattern in patterns:
-                # Use secure regex with timeout protection
-                if SecureRegex.safe_search(pattern, user_input, re.IGNORECASE, timeout=1):
+                # Use regular regex search
+                if re.search(pattern, user_input, re.IGNORECASE):
                     return intent
         return 'default'
 
@@ -207,9 +241,8 @@ class RealEstateChatbot:
             return insights
         
         elif intent == 'emi':
-            # Try to extract numbers for EMI calculation using secure method
-            from secure_regex import extract_safe_numbers
-            numbers = extract_safe_numbers(user_input, max_numbers=5)
+            # Try to extract numbers for EMI calculation
+            numbers = re.findall(r'\d+(?:\.\d+)?', user_input)
             if len(numbers) >= 3:
                 try:
                     principal = float(numbers[0]) * (1000000 if float(numbers[0]) < 100 else 1)  # Assume millions if small number
