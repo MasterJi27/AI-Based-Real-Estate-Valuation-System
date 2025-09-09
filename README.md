@@ -22,6 +22,25 @@ Click the badge below to watch a full video demonstration of the project's featu
   </a>
 </div>
 
+## 📸 Screenshots
+
+Here's a glimpse of the application's user interface.
+
+### Dashboard
+![Dashboard](https://drive.google.com/uc?export=view&id=1kVbvsQId4SgyfeJSomhGnFRhKhb8h_9N)
+
+### Investment Analysis
+![Investment Opportunity Analysis](https://drive.google.com/uc?export=view&id=176tKwPYltaH0pVUKp9IDUTqVvOi7UL7H)
+
+### Property Valuation
+![Property Details and Valuation](https://drive.google.com/uc?export=view&id=1es0dcJmuaU2_i2zu21VWHrMxLBbZJMwq)
+
+### AI Market Analysis
+![AI Market Analysis](https://drive.google.com/uc?export=view&id=1wvHjSQ5GFEUWuN9imUUE8LU_6kUCLSoQ)
+
+### Gemini AI Insights
+![Gemini AI Insights](https://drive.google.com/uc?export=view&id=1qhlyWQ_dqXqcOnWEcvqyC9wqFkfbCJvV)
+
 ## ✨ Key Features
 
 ### 🔮 Price Prediction
@@ -139,7 +158,7 @@ Open your browser and navigate to `http://localhost:8501`
 - **Optimization**: Hyperparameter tuning and model selection
 
 ### AI Integration
-- **Google Gemini 2.5**: Advanced natural language processing
+- **Google Gemini 2.5**: Advanced natural language.
 - **Model**: gemini-1.5-flash (optimized for performance)
 - **Features**: Market analysis, investment recommendations, Q&A
 - **Security**: Secure API key handling and rate limiting
@@ -382,7 +401,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ✅ **User-Friendly**: Intuitive interface design  
 
 ---
-
 **Built with ❤️ for the future of real estate technology**
 
 *Last Updated: September 9, 2025*
