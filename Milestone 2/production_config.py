@@ -89,13 +89,20 @@ class ProductionConfig:
         
         # Data Configuration
         self.DATA_CONFIG = {
-            'min_area': int(os.getenv('MIN_PROPERTY_AREA', '100')),
-            'max_area': int(os.getenv('MAX_PROPERTY_AREA', '10000')),
-            'min_bhk': int(os.getenv('MIN_BHK', '1')),
-            'max_bhk': int(os.getenv('MAX_BHK', '10')),
+            'min_area': max(int(os.getenv('MIN_PROPERTY_AREA', '100')), 50),  # Ensure minimum is at least 50
+            'max_area': max(int(os.getenv('MAX_PROPERTY_AREA', '10000')), 1000),  # Ensure maximum is at least 1000
+            'min_bhk': max(int(os.getenv('MIN_BHK', '1')), 1),  # Ensure minimum is at least 1
+            'max_bhk': max(int(os.getenv('MAX_BHK', '10')), 2),  # Ensure maximum is at least 2
             'min_price': int(os.getenv('MIN_PRICE', '100000')),
             'max_price': int(os.getenv('MAX_PRICE', '1000000000'))
         }
+        
+        # Ensure valid ranges
+        if self.DATA_CONFIG['min_area'] >= self.DATA_CONFIG['max_area']:
+            self.DATA_CONFIG['max_area'] = self.DATA_CONFIG['min_area'] + 1000
+        
+        if self.DATA_CONFIG['min_bhk'] >= self.DATA_CONFIG['max_bhk']:
+            self.DATA_CONFIG['max_bhk'] = self.DATA_CONFIG['min_bhk'] + 1
         
         # External APIs
         self.EXTERNAL_APIS = {
