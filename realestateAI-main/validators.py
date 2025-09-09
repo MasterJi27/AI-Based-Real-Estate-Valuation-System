@@ -4,7 +4,7 @@ Input Validation and Sanitization Module
 import re
 import pandas as pd
 from typing import Dict, Any, List, Tuple, Optional
-from config import config
+from production_config import config
 
 class InputValidator:
     """Validates and sanitizes user inputs"""

@@ -10,17 +10,100 @@ from emi_calculator import EMICalculator
 from database import DatabaseManager
 from property_analyzer import PropertyAnalyzer
 from chatbot import RealEstateChatbot
-from config import config
+# Use production modules instead of legacy ones
+from production_config import config
+from production_logging import ProductionLogger
+from production_security import SecurityManager, RateLimiter
 from validators import InputValidator, DataValidator
-from error_handler import ErrorHandler, safe_execute, log_user_interaction
-from performance_monitor import performance_monitor, rate_limiter, CacheManager
+
+# Initialize production components
+logger = ProductionLogger()
+security_manager = SecurityManager()
+rate_limiter = RateLimiter()
+
+# Simple replacements for legacy functions
+def safe_execute(func, error_handler=None, fallback_value=None, context=""):
+    """Simple safe execution wrapper"""
+    try:
+        return func()
+    except Exception as e:
+        logger.error(f"Error in {context}: {str(e)}")
+        return fallback_value
+
+def log_user_interaction(action, data=None):
+    """Simple user interaction logging"""
+    logger.info(f"User interaction: {action}", extra={'data': data or {}})
+
+class SimplePerformanceMonitor:
+    """Simple performance monitoring replacement"""
+    def __init__(self):
+        self.timers = {}
+    
+    def start_timer(self, name):
+        import time
+        timer_id = f"{name}_{time.time()}"
+        self.timers[timer_id] = time.time()
+        return timer_id
+    
+    def end_timer(self, timer_id, name):
+        import time
+        if timer_id in self.timers:
+            duration = time.time() - self.timers[timer_id]
+            del self.timers[timer_id]
+            return duration
+        return 0
+    
+    def record_prediction(self, city, duration, success):
+        logger.info(f"Prediction recorded: {city}, duration: {duration}s, success: {success}")
+    
+    def get_performance_summary(self):
+        return {"status": "monitoring active"}
+
+class SimpleCacheManager:
+    """Simple cache management replacement"""
+    @staticmethod
+    def load_data():
+        # Load data using DataLoader
+        from data_loader import DataLoader
+        loader = DataLoader()
+        return loader.load_all_data()
+    
+    @staticmethod
+    def load_model():
+        from ml_model import RealEstatePricePredictor
+        return RealEstatePricePredictor()
+    
+    @staticmethod
+    def clear_cache():
+        pass
+
+# Initialize simple replacements
+performance_monitor = SimplePerformanceMonitor()
+CacheManager = SimpleCacheManager()
+
+class SimpleErrorHandler:
+    """Simple error handler replacement"""
+    def handle_data_error(self, error, context):
+        logger.error(f"Data error in {context}: {str(error)}")
+        return f"Data processing error: {str(error)}"
+    
+    def handle_prediction_error(self, error, data):
+        logger.error(f"Prediction error: {str(error)}")
+        return f"Prediction failed: {str(error)}"
+    
+    def handle_database_error(self, error, context):
+        logger.error(f"Database error in {context}: {str(error)}")
+        return f"Database error: {str(error)}"
+
+# Initialize error handler
+error_handler = SimpleErrorHandler()
 from gemini_ai import GeminiAIService, initialize_gemini_service, get_gemini_service
 import uuid
 import warnings
 warnings.filterwarnings('ignore')
 
 # Initialize error handler
-error_handler = ErrorHandler()
+error_handler = SimpleErrorHandler()
 
 # Configure page
 st.set_page_config(
