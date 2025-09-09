@@ -1,9 +1,9 @@
 [project]
-name = "streamlit"
+name = "real-estate-app"
 version = "0.1.0"
-description = "Streamlit project"
+description = "Real Estate Analysis Streamlit App"
 authors = [
-	{ name = "Your Name", email = "your@email.com" }
+    { name = "Your Name", email = "your@email.com" }
 ]
 requires-python = ">=3.9"
 dependencies = [
