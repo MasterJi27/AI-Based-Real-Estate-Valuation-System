@@ -12,6 +12,16 @@
 
 A comprehensive AI-powered real estate valuation system that combines machine learning price prediction with Google Gemini 2.5 AI for advanced market analysis and investment insights. Designed for real estate professionals, investors, and homebuyers in Indian metropolitan markets.
 
+## 🎥 Video Demo
+
+Click the badge below to watch a full video demonstration of the project's features and capabilities.
+
+<div align="center">
+  <a href="https://drive.google.com/file/d/1tbKkmLtmZY4K6-aNB1r7X3rtrXcXgu8S/view" target="_blank">
+    <img src="https://img.shields.io/badge/Watch_Video_Demo-Click_Here-blue?style=for-the-badge&logo=googledrive&logoColor=white" alt="Watch the Video Demo"/>
+  </a>
+</div>
+
 ## ✨ Key Features
 
 ### 🔮 Price Prediction
@@ -56,7 +66,7 @@ A comprehensive AI-powered real estate valuation system that combines machine le
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/MasterJi27/AI-Based-Real-Estate-Valuation-System.git
 cd AI-Based-Real-Estate-Valuation-System/realestateAI-main
 ```
 
@@ -375,4 +385,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with ❤️ for the future of real estate technology**
 
-*Last Updated: September 8, 2025*
+*Last Updated: September 9, 2025*
