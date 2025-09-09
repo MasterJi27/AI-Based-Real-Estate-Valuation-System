@@ -21,6 +21,19 @@ class ProductionConfig:
         # self._validate_configuration() 
         self._setup_logging()
     
+    def _get_api_key(self):
+        """Get API key from multiple sources"""
+        try:
+            import streamlit as st
+            # Try Streamlit secrets first
+            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
+                return st.secrets['GOOGLE_API_KEY']
+        except:
+            pass
+        
+        # Try environment variables
+        return os.getenv('GEMINI_API_KEY', '') or os.getenv('GOOGLE_API_KEY', '')
+
     def _load_configuration(self):
         """Load all configuration from environment variables with defaults"""
         
@@ -41,19 +54,6 @@ class ProductionConfig:
             'max_connections': int(os.getenv('DB_MAX_CONNECTIONS', '20')),
             'connection_timeout': int(os.getenv('DB_CONNECTION_TIMEOUT', '30'))
         }
-        
-    def _get_api_key(self):
-        """Get API key from multiple sources"""
-        try:
-            import streamlit as st
-            # Try Streamlit secrets first
-            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
-                return st.secrets['GOOGLE_API_KEY']
-        except:
-            pass
-        
-        # Try environment variables
-        return os.getenv('GEMINI_API_KEY', '') or os.getenv('GOOGLE_API_KEY', '')
         
         # AI Configuration
         self.AI_CONFIG = {
