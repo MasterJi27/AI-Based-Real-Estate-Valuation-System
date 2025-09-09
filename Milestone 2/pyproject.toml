@@ -1,17 +1,16 @@
-[project]
-name = "repl-nix-workspace"
+# This file was moved to the root for deployment compatibility
+# If you use poetry or another tool, update paths as needed
+[tool.poetry]
+name = "streamlit"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.11"
-dependencies = [
-    "joblib>=1.5.1",
-    "matplotlib>=3.10.3",
-    "numpy>=2.3.0",
-    "pandas>=2.3.0",
-    "plotly>=6.1.2",
-    "psycopg2-binary>=2.9.10",
-    "scikit-learn>=1.7.0",
-    "seaborn>=0.13.2",
-    "streamlit>=1.45.1",
-    "xgboost>=3.0.2",
-]
+description = "Streamlit project"
+authors = ["Your Name <your@email.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+streamlit = "*"
+# Add other dependencies here
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
