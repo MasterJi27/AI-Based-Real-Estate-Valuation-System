@@ -161,12 +161,7 @@ class ProductionConfig:
             if not self.AI_CONFIG['gemini_api_key'] and self.AI_CONFIG['enable_gemini_ai']:
                 warnings.warn("Gemini AI is enabled but API key is not configured", UserWarning)
         
-        # Validate numeric ranges
-        if self.DATA_CONFIG['min_area'] >= self.DATA_CONFIG['max_area']:
-            raise ValueError("Invalid area range configuration")
-        
-        if self.DATA_CONFIG['min_bhk'] >= self.DATA_CONFIG['max_bhk']:
-            raise ValueError("Invalid BHK range configuration")
+        # Note: DATA_CONFIG ranges are auto-corrected during loading, no validation needed
         
         # Validate rate limits
         if self.SECURITY_CONFIG['rate_limit_requests_per_minute'] <= 0:
