@@ -41,10 +41,23 @@ class ProductionConfig:
             'connection_timeout': int(os.getenv('DB_CONNECTION_TIMEOUT', '30'))
         }
         
+    def _get_api_key(self):
+        """Get API key from multiple sources"""
+        try:
+            import streamlit as st
+            # Try Streamlit secrets first
+            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
+                return st.secrets['GOOGLE_API_KEY']
+        except:
+            pass
+        
+        # Try environment variables
+        return os.getenv('GEMINI_API_KEY', '') or os.getenv('GOOGLE_API_KEY', '')
+        
         # AI Configuration
         self.AI_CONFIG = {
             'enable_gemini_ai': os.getenv('ENABLE_GEMINI_AI', 'true').lower() == 'true',
-            'gemini_api_key': os.getenv('GEMINI_API_KEY', ''),
+            'gemini_api_key': self._get_api_key(),
             'request_timeout': int(os.getenv('AI_REQUEST_TIMEOUT', '30')),
             'max_retries': int(os.getenv('AI_MAX_RETRIES', '3'))
         }
