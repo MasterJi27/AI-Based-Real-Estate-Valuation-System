@@ -63,33 +63,43 @@ Built for: Investors • Analysts • Real Estate Professionals • Home Buyers 
 <table width="100%">
   <tr>
     <td align="center" width="50%">
-      <img src="https://drive.google.com/uc?export=view&id=1kVbvsQId4SgyfeJSomhGnFRhKhb8h_9N" alt="Dashboard">
+      <img src="./assets/AI_Real_Estate_Price_Predictor_Dashboard.png" alt="Dashboard">
       <br><sub><b>Dashboard</b></sub>
     </td>
     <td align="center" width="50%">
-      <img src="https://drive.google.com/uc?export=view&id=176tKwPYltaH0pVUKp9IDUTqVvOi7UL7H" alt="Investment Analysis">
+      <img src="./assets/Investment_Opportunity_Analysis.png" alt="Investment Analysis">
       <br><sub><b>Investment Analysis</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="https://drive.google.com/uc?export=view&id=1es0dcJmuaU2_i2zu21VWHrMxLBbZJMwq" alt="Valuation Panel">
-      <br><sub><b>Property Valuation</b></sub>
+      <img src="./assets/Property_Portfolio_Input.png" alt="Property Input">
+      <br><sub><b>Property Input</b></sub>
     </td>
     <td align="center" width="50%">
-      <img src="https://drive.google.com/uc?export=view&id=1wvHjSQ5GFEUWuN9imUUE8LU_6kUCLSoQ" alt="Market Intelligence">
-      <br><sub><b>AI Market Analysis</b></sub>
+      <img src="./assets/Property_Portfolio_Valuation.png" alt="Property Valuation">
+      <br><sub><b>Property Valuation</b></sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="./assets/Property_Value_Analysis.png" alt="Property Analysis">
+      <br><sub><b>Property Analysis</b></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="./assets/Market_Analysis_1000sqft_Apartment_Mumbai.png" alt="Market Analysis">
+      <br><sub><b>Market Analysis</b></sub>
     </td>
   </tr>
   <tr>
     <td align="center" colspan="2">
-      <img src="https://drive.google.com/uc?export=view&id=1qhlyWQ_dqXqcOnWEcvqyC9wqFkfbCJvV" alt="Gemini Insights">
-      <br><sub><b>Gemini AI Insight Narrative</b></sub>
+      <img src="./assets/Investment_Recommendations_5M_Budget.png" alt="Investment Recommendations">
+      <br><sub><b>Investment Recommendations</b></sub>
     </td>
   </tr>
 </table>
 
-> Recommendation: Host static copies in `assets/` for permanence.
+> Images are hosted locally in `assets/` for permanence and reliability.
 
 </details>
 
@@ -335,4 +345,4 @@ GitHub: [MasterJi27](https://github.com/MasterJi27)
 ---
 
 <p align="center"><strong>Built with ❤️ for the future of intelligent real estate.</strong></p>
-<p align="right"><sub>Last Updated: September 9, 2025</sub></p>
+<p align="right"><sub>Last Updated: September 14, 2025</sub></p>
