@@ -10,6 +10,8 @@ from emi_calculator import EMICalculator
 from database import DatabaseManager
 from property_analyzer import PropertyAnalyzer
 from chatbot import RealEstateChatbot
+from financial_calculator import render_financial_tools
+from content_system import render_content_system
 # Use production modules instead of legacy ones
 from production_config import config
 from production_logging import ProductionLogger
@@ -236,7 +238,7 @@ def main():
                 st.json(metrics)
     
     # Navigation tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🔮 Price Prediction", "📊 Property Valuation", "💼 Investment Analysis", "🤖 AI Assistant", "🧠 Gemini AI Insights"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["🔮 Price Prediction", "📊 Property Valuation", "💼 Investment Analysis", "💰 Financial Tools", "📚 Knowledge Center", "🤖 AI Assistant", "🧠 Gemini AI Insights"])
     
     with tab1:
         price_prediction_interface()
@@ -248,9 +250,15 @@ def main():
         investment_analysis_interface()
     
     with tab4:
-        ai_assistant_interface()
+        render_financial_tools()
     
     with tab5:
+        render_content_system()
+    
+    with tab6:
+        ai_assistant_interface()
+    
+    with tab7:
         st.header("🧠 Gemini AI Insights")
         st.markdown("### Advanced Real Estate Intelligence powered by Google Gemini 2.5")
         

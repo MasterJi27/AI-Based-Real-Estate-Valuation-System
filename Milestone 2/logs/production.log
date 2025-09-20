@@ -93,3 +93,216 @@
 2025-09-09 07:29:44,801 - gemini_ai - INFO - Gemini AI interaction logged: {'timestamp': '2025-09-09T07:29:44.801837', 'interaction_type': 'property_market_analysis', 'input_size': 129, 'output_size': 4986, 'status': 'success'}
 2025-09-09 07:29:44 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
 2025-09-09 07:29:44,803 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:31:09,661 - database - INFO - Database connection not available. Running without database.
+2025-09-20 17:31:09,904 - data_loader - INFO - Raw rows before cleaning: 100
+2025-09-20 17:31:09,910 - data_loader - INFO - Rows after cleaning: 100
+2025-09-20 17:31:09,910 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-09-20 17:31:09,913 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 17:31:09,916 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 17:31:09,916 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-09-20 17:31:09,918 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 17:31:09,921 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 17:31:09,921 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-09-20 17:31:09,923 - data_loader - INFO - Raw rows before cleaning: 108
+2025-09-20 17:31:09,926 - data_loader - INFO - Rows after cleaning: 108
+2025-09-20 17:31:09,926 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-09-20 17:31:09,928 - data_loader - INFO - Raw rows before cleaning: 105
+2025-09-20 17:31:09,931 - data_loader - INFO - Rows after cleaning: 105
+2025-09-20 17:31:09,931 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-09-20 17:31:09,932 - data_loader - INFO - Total valid rows loaded: 525
+2025-09-20 17:31:10,153 - database - INFO - Database connection not available. Skipping data loading.
+2025-09-20 17:31:10 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-09-20 17:31:10,153 - RealEstateAI - INFO - User interaction: data_loaded
+2025-09-20 17:31:10,157 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-09-20 17:31:10,159 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-09-20 17:31:10 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:31:10,750 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:31:22 - RealEstateAI - INFO - production_logging.py:93 - Prediction recorded: Mumbai, duration: 0.03150534629821777s, success: True
+2025-09-20 17:31:22,526 - RealEstateAI - INFO - Prediction recorded: Mumbai, duration: 0.03150534629821777s, success: True
+2025-09-20 17:31:22 - RealEstateAI - INFO - production_logging.py:93 - User interaction: prediction
+2025-09-20 17:31:22,527 - RealEstateAI - INFO - User interaction: prediction
+2025-09-20 17:31:22 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:31:22,940 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:31:30,531 - ml_model - INFO - Error making prediction: Must pass 2-d input. shape=(1, 1, 7)
+2025-09-20 17:31:30,918 - gemini_ai - ERROR - Error in property market analysis: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+]
+2025-09-20 17:31:30 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:31:30,920 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:53:07,525 - database - INFO - Database connection not available. Running without database.
+2025-09-20 17:53:07,723 - data_loader - INFO - Raw rows before cleaning: 100
+2025-09-20 17:53:07,726 - data_loader - INFO - Rows after cleaning: 100
+2025-09-20 17:53:07,727 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-09-20 17:53:07,729 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 17:53:07,732 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 17:53:07,732 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-09-20 17:53:07,734 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 17:53:07,737 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 17:53:07,737 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-09-20 17:53:07,739 - data_loader - INFO - Raw rows before cleaning: 108
+2025-09-20 17:53:07,742 - data_loader - INFO - Rows after cleaning: 108
+2025-09-20 17:53:07,742 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-09-20 17:53:07,744 - data_loader - INFO - Raw rows before cleaning: 105
+2025-09-20 17:53:07,747 - data_loader - INFO - Rows after cleaning: 105
+2025-09-20 17:53:07,747 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-09-20 17:53:07,748 - data_loader - INFO - Total valid rows loaded: 525
+2025-09-20 17:53:07,986 - database - INFO - Database connection not available. Skipping data loading.
+2025-09-20 17:53:07 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-09-20 17:53:07,987 - RealEstateAI - INFO - User interaction: data_loaded
+2025-09-20 17:53:07,990 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-09-20 17:53:07,991 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-09-20 17:53:08 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:53:08,352 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:53:57 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:53:57,100 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:08 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:08,306 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:14 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:14,257 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:28 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:28,250 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:33 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:33,766 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:40 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:40,495 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:43 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:43,897 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:44 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:44,619 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:47 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:47,412 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:48 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:48,968 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:50 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:50,960 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:51 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:51,937 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:54:54 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:54:54,622 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 17:55:00 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 17:55:00,391 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:02:53,482 - database - INFO - Database connection not available. Running without database.
+2025-09-20 18:02:53,723 - data_loader - INFO - Raw rows before cleaning: 100
+2025-09-20 18:02:53,726 - data_loader - INFO - Rows after cleaning: 100
+2025-09-20 18:02:53,726 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-09-20 18:02:53,728 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:02:53,732 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:02:53,732 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-09-20 18:02:53,734 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:02:53,737 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:02:53,737 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-09-20 18:02:53,739 - data_loader - INFO - Raw rows before cleaning: 108
+2025-09-20 18:02:53,742 - data_loader - INFO - Rows after cleaning: 108
+2025-09-20 18:02:53,743 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-09-20 18:02:53,744 - data_loader - INFO - Raw rows before cleaning: 105
+2025-09-20 18:02:53,748 - data_loader - INFO - Rows after cleaning: 105
+2025-09-20 18:02:53,748 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-09-20 18:02:53,749 - data_loader - INFO - Total valid rows loaded: 525
+2025-09-20 18:02:53,957 - database - INFO - Database connection not available. Skipping data loading.
+2025-09-20 18:02:53 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-09-20 18:02:53,957 - RealEstateAI - INFO - User interaction: data_loaded
+2025-09-20 18:02:53,960 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-09-20 18:02:53,961 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-09-20 18:02:54 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:02:54,368 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:26 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:26,562 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:36 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:36,785 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:42 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:42,584 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:51 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:51,579 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:55 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:55,954 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:03:59 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:03:59,803 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:04:05 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:04:05,913 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:04:12 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:04:12,922 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:04:21 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:04:21,575 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:04:23 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:04:23,295 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:04:46 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:04:46,934 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:29:09,858 - database - INFO - Database connection not available. Running without database.
+2025-09-20 18:29:57,233 - database - INFO - Database connection not available. Running without database.
+2025-09-20 18:29:57,427 - data_loader - INFO - Raw rows before cleaning: 100
+2025-09-20 18:29:57,430 - data_loader - INFO - Rows after cleaning: 100
+2025-09-20 18:29:57,430 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-09-20 18:29:57,432 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:29:57,435 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:29:57,436 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-09-20 18:29:57,438 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:29:57,441 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:29:57,441 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-09-20 18:29:57,443 - data_loader - INFO - Raw rows before cleaning: 108
+2025-09-20 18:29:57,446 - data_loader - INFO - Rows after cleaning: 108
+2025-09-20 18:29:57,446 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-09-20 18:29:57,447 - data_loader - INFO - Raw rows before cleaning: 105
+2025-09-20 18:29:57,450 - data_loader - INFO - Rows after cleaning: 105
+2025-09-20 18:29:57,451 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-09-20 18:29:57,452 - data_loader - INFO - Total valid rows loaded: 525
+2025-09-20 18:29:57,705 - database - INFO - Database connection not available. Skipping data loading.
+2025-09-20 18:29:57 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-09-20 18:29:57,706 - RealEstateAI - INFO - User interaction: data_loaded
+2025-09-20 18:29:57,708 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-09-20 18:29:57,709 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-09-20 18:29:58 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:29:58,197 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:15,416 - database - INFO - Database connection not available. Running without database.
+2025-09-20 18:35:15,616 - data_loader - INFO - Raw rows before cleaning: 100
+2025-09-20 18:35:15,619 - data_loader - INFO - Rows after cleaning: 100
+2025-09-20 18:35:15,620 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-09-20 18:35:15,622 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:35:15,625 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:35:15,626 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-09-20 18:35:15,627 - data_loader - INFO - Raw rows before cleaning: 106
+2025-09-20 18:35:15,630 - data_loader - INFO - Rows after cleaning: 106
+2025-09-20 18:35:15,630 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-09-20 18:35:15,632 - data_loader - INFO - Raw rows before cleaning: 108
+2025-09-20 18:35:15,635 - data_loader - INFO - Rows after cleaning: 108
+2025-09-20 18:35:15,635 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-09-20 18:35:15,637 - data_loader - INFO - Raw rows before cleaning: 105
+2025-09-20 18:35:15,640 - data_loader - INFO - Rows after cleaning: 105
+2025-09-20 18:35:15,640 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-09-20 18:35:15,641 - data_loader - INFO - Total valid rows loaded: 525
+2025-09-20 18:35:15,862 - database - INFO - Database connection not available. Skipping data loading.
+2025-09-20 18:35:15 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-09-20 18:35:15,862 - RealEstateAI - INFO - User interaction: data_loaded
+2025-09-20 18:35:15,867 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-09-20 18:35:15,868 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-09-20 18:35:16 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:16,285 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:26 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:26,368 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:34 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:34,968 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:42 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:42,667 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:44 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:44,103 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:52 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:52,854 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:35:57 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:35:57,026 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:04 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:04,223 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:10 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:10,735 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:12 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:12,149 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:17 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:17,276 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:19 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:19,718 - RealEstateAI - INFO - User interaction: page_view
+2025-09-20 18:36:23 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-09-20 18:36:23,164 - RealEstateAI - INFO - User interaction: page_view
