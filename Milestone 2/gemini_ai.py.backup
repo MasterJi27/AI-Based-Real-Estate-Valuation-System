@@ -108,50 +108,9 @@ class GeminiAIService:
             
         except Exception as e:
             logger.error(f"Error in property market analysis: {str(e)}")
+            logger.error(f"Property data: {property_data}")
             # Return fallback analysis instead of generic error
-            location = property_data.get('location', 'the specified location')
-            property_type = property_data.get('property_type', 'residential property')
-            area = property_data.get('area', 'N/A')
-            predicted_price = property_data.get('predicted_price', 0)
-            
-            # Format price safely
-            if isinstance(predicted_price, (int, float)) and predicted_price > 0:
-                price_str = f"₹{predicted_price:,}"
-            else:
-                price_str = "To be determined"
-            
-            return f"""
-**Market Analysis (Basic Assessment)**
-
-**Property Overview:**
-• Location: {location}
-• Type: {property_type}
-• Area: {area} sq ft
-• Estimated Value: {price_str}
-
-**Market Positioning:**
-• This property appears to be positioned in the mid-to-premium segment
-• The location offers good connectivity and infrastructure
-• Current market conditions are favorable for both buyers and investors
-
-**Investment Potential:**
-• Residential properties in this area typically appreciate 8-12% annually
-• Good rental yield potential based on location and amenities
-• Strong demand from working professionals and families
-
-**Price Competitiveness:**
-• The estimated price is competitive for the local market
-• Properties in this segment offer good value for money
-• Current market timing is favorable for purchase
-
-**Recommendations:**
-• Verify all legal documents and property clearances
-• Check for upcoming infrastructure developments
-• Consider long-term investment potential (5+ years)
-• Evaluate financing options for optimal returns
-
-*Note: This is a basic analysis. For detailed market insights, please consult with a real estate expert.*
-"""
+            return self._generate_fallback_market_analysis(property_data)
     
     def get_investment_recommendations(self, user_profile: Dict[str, Any]) -> str:
         """
@@ -164,16 +123,21 @@ class GeminiAIService:
             Personalized investment recommendations
         """
         try:
+            # Validate user profile
+            if not user_profile:
+                logger.warning("Empty user profile provided for investment recommendations")
+                return self._generate_fallback_investment_recommendations()
+            
             prompt = f"""
             As a real estate investment advisor, provide personalized recommendations for this investor:
             
             Investor Profile:
-            - Budget: ₹{user_profile.get('budget', 'N/A'):,}
-            - Investment Timeline: {user_profile.get('timeline', 'N/A')}
-            - Risk Appetite: {user_profile.get('risk_appetite', 'N/A')}
-            - Investment Goal: {user_profile.get('goal', 'N/A')}
-            - Preferred Locations: {user_profile.get('preferred_locations', 'N/A')}
-            - Property Type Preference: {user_profile.get('property_type', 'N/A')}
+            - Budget: {self._format_budget(user_profile.get('budget', 'Not specified'))}
+            - Investment Timeline: {user_profile.get('timeline', 'Not specified')}
+            - Risk Appetite: {user_profile.get('risk_appetite', 'Moderate')}
+            - Investment Goal: {user_profile.get('goal', 'Long-term appreciation')}
+            - Preferred Locations: {user_profile.get('preferred_locations', 'Major Indian cities')}
+            - Property Type Preference: {user_profile.get('property_type', 'Residential apartments')}
             
             Please provide:
             1. Recommended property types and locations
@@ -188,46 +152,99 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
+            # Check if response is valid
+            if not response or not response.text or len(response.text.strip()) < 50:
+                logger.warning("Received invalid or short response from Gemini AI")
+                return self._generate_fallback_investment_recommendations()
+            
             # Log the interaction
             self._log_interaction("investment_recommendations", user_profile, response.text)
             
-            return response.text
+            return response.text.strip()
             
         except Exception as e:
             logger.error(f"Error generating investment recommendations: {str(e)}")
-            # Return helpful fallback recommendations instead of generic error
-            return """
-**Investment Recommendations (Basic Analysis)**
-
-Based on current Indian real estate market conditions:
-
-**1. Recommended Property Types:**
-• Residential apartments in Tier-1 cities (Mumbai, Delhi, Bangalore)
-• Commercial properties in IT hubs
-• Affordable housing projects in suburban areas
-
-**2. Investment Strategy:**
-• Diversify across multiple locations
-• Consider both residential and commercial properties
-• Focus on properties with good connectivity and infrastructure
-
-**3. Market Timing:**
-• Current market offers good buying opportunities
-• Consider properties in developing areas with infrastructure projects
-• Monitor interest rate trends for optimal financing
-
-**4. Risk Mitigation:**
-• Verify all legal documents thoroughly
-• Choose reputed developers with good track records
-• Maintain adequate liquidity for unexpected expenses
-
-**5. Expected Returns:**
-• Residential: 8-12% annually (including appreciation + rental)
-• Commercial: 10-15% annually
-• Long-term outlook: 5-10 years for optimal returns
-
-*Note: These are general recommendations. For personalized advice, please consult with a certified financial advisor.*
-"""
+            logger.error(f"User profile: {user_profile}")
+            # Return fallback recommendations instead of generic error
+            return self._generate_fallback_investment_recommendations()
+    
+    def _generate_fallback_investment_recommendations(self) -> str:
+        """Generate basic investment recommendations when AI service fails"""
+        return """
+        **Investment Recommendations (Basic Analysis)**
+        
+        Based on current Indian real estate market conditions:
+        
+        **1. Recommended Property Types:**
+        • Residential apartments in Tier-1 cities (Mumbai, Delhi, Bangalore)
+        • Commercial properties in IT hubs
+        • Affordable housing projects in suburban areas
+        
+        **2. Investment Strategy:**
+        • Diversify across multiple locations
+        • Consider both residential and commercial properties
+        • Focus on properties with good connectivity and infrastructure
+        
+        **3. Market Timing:**
+        • Current market offers good buying opportunities
+        • Consider properties in developing areas with infrastructure projects
+        • Monitor interest rate trends for optimal financing
+        
+        **4. Risk Mitigation:**
+        • Verify all legal documents thoroughly
+        • Choose reputed developers with good track records
+        • Maintain adequate liquidity for unexpected expenses
+        
+        **5. Expected Returns:**
+        • Residential: 8-12% annually (including appreciation + rental)
+        • Commercial: 10-15% annually
+        • Long-term outlook: 5-10 years for optimal returns
+        
+                *Note: These are general recommendations. For personalized advice, please consult with a certified financial advisor.*
+        """
+    
+    def _generate_fallback_market_analysis(self, property_data: Dict[str, Any]) -> str:
+        """Generate basic market analysis when AI service fails"""
+        location = property_data.get('location', 'the specified location')
+        property_type = property_data.get('property_type', 'residential property')
+        area = property_data.get('area', 'N/A')
+        predicted_price = property_data.get('predicted_price', 0)
+        
+        return f"""
+        **Market Analysis (Basic Assessment)**
+        
+        **Property Overview:**
+        • Location: {location}
+        • Type: {property_type}
+        • Area: {area} sq ft
+        • Estimated Value: {self._format_budget(predicted_price)}
+        
+        **Market Positioning:**
+        • This property appears to be positioned in the mid-to-premium segment
+        • The location offers good connectivity and infrastructure
+        • Current market conditions are favorable for both buyers and investors
+        
+        **Investment Potential:**
+        • Residential properties in this area typically appreciate 8-12% annually
+        • Good rental yield potential based on location and amenities
+        • Strong demand from working professionals and families
+        
+        **Price Competitiveness:**
+        • The estimated price is competitive for the local market
+        • Properties in this segment offer good value for money
+        • Current market timing is favorable for purchase
+        
+        **Recommendations:**
+        • Verify all legal documents and property clearances
+        • Check for upcoming infrastructure developments
+        • Consider long-term investment potential (5+ years)
+        • Evaluate financing options for optimal returns
+        
+        *Note: This is a basic analysis. For detailed market insights, please consult with a real estate expert.*
+        """
+    
+    def _format_budget(self, budget) -> str:
+        """
     
     def analyze_market_trends(self, city: str, property_type: str = None) -> str:
         """
@@ -374,6 +391,18 @@ Based on current Indian real estate market conditions:
         """Clear conversation history"""
         self.conversation_history = []
         logger.info("Conversation history cleared")
+    
+    def _format_budget(self, budget) -> str:
+        """Format budget value for display"""
+        if isinstance(budget, (int, float)) and budget > 0:
+            if budget >= 10000000:  # 1 crore
+                return f"₹{budget/10000000:.1f} Crore"
+            elif budget >= 100000:  # 1 lakh
+                return f"₹{budget/100000:.1f} Lakh"
+            else:
+                return f"₹{budget:,.0f}"
+        else:
+            return str(budget) if budget else "Not specified"
     
     def _log_interaction(self, interaction_type: str, input_data: Any, output_data: str):
         """Log AI interactions for monitoring and improvement"""
