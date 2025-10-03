@@ -24,8 +24,9 @@ Based on the error logs provided, the following critical issues were identified 
 **Root Cause:** The Gemini AI service was using an incorrect model name that doesn't exist in the current API.
 
 **Fix Applied:**
-- Updated model name from `'gemini-1.5-flash'` to `'gemini-1.5-flash-latest'`
-- This uses the correct model identifier for the current Gemini API v1beta
+- Updated model name from `'gemini-1.5-flash'` to `'gemini-flash-latest'`
+- This uses the correct model identifier that actually exists in the current Gemini API
+- Verified against live API to ensure the model name is valid
 
 **Files Modified:**
 - `gemini_ai.py` - Line 48

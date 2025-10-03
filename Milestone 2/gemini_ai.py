@@ -45,7 +45,7 @@ class GeminiAIService:
             genai.configure(api_key=self.api_key)
             
             # Initialize model with optimal settings for real estate analysis
-            model_name = 'gemini-1.5-flash-latest'  # Use correct model name for API v1beta
+            model_name = 'gemini-flash-latest'  # Use correct model name for current API
             self.model = genai.GenerativeModel(
                 model_name=model_name,
                 generation_config=genai.types.GenerationConfig(
