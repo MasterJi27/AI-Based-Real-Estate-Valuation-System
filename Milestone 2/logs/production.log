@@ -1,1 +1,308 @@
 Fri Oct  3 13:25:21 UTC 2025 - System - INFO - All bugs fixed and system verified working
+2025-10-03 14:03:12,920 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:12,920 - database - INFO - Database connection not available. Running without database.
+2025-10-03 14:03:13,125 - data_loader - INFO - Raw rows before cleaning: 100
+2025-10-03 14:03:13,129 - data_loader - INFO - Rows after cleaning: 100
+2025-10-03 14:03:13,129 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-10-03 14:03:13,131 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-03 14:03:13,136 - data_loader - INFO - Rows after cleaning: 106
+2025-10-03 14:03:13,136 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-10-03 14:03:13,138 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-03 14:03:13,142 - data_loader - INFO - Rows after cleaning: 106
+2025-10-03 14:03:13,142 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-10-03 14:03:13,145 - data_loader - INFO - Raw rows before cleaning: 108
+2025-10-03 14:03:13,148 - data_loader - INFO - Rows after cleaning: 108
+2025-10-03 14:03:13,148 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-10-03 14:03:13,151 - data_loader - INFO - Raw rows before cleaning: 105
+2025-10-03 14:03:13,154 - data_loader - INFO - Rows after cleaning: 105
+2025-10-03 14:03:13,154 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-10-03 14:03:13,155 - data_loader - INFO - Total valid rows loaded: 525
+2025-10-03 14:03:13,382 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:13,382 - database - INFO - Database connection not available. Skipping data loading.
+2025-10-03 14:03:13 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-10-03 14:03:13,382 - RealEstateAI - INFO - User interaction: data_loaded
+2025-10-03 14:03:13,385 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-10-03 14:03:13,386 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-10-03 14:03:13,391 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:13,393 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:14,325 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:14,348 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:14,454 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:14 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:03:14,679 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:03:17,176 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:17,177 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:17,452 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:17,461 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:17,473 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:17,569 - ml_model - ERROR - Error making prediction: Must pass 2-d input. shape=(1, 1, 7)
+2025-10-03 14:03:25,392 - gemini_ai - INFO - Gemini AI interaction logged: {'timestamp': '2025-10-03T14:03:25.392446', 'interaction_type': 'property_market_analysis', 'input_size': 129, 'output_size': 287, 'status': 'success'}
+2025-10-03 14:03:25 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:03:25,393 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:03:46,880 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:46,881 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:47,151 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:47,163 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:47,176 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:47 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:03:47,300 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:03:48,691 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:48,692 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:49,010 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:49,017 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:49,033 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:03:58,598 - gemini_ai - INFO - Gemini AI interaction logged: {'timestamp': '2025-10-03T14:03:58.598157', 'interaction_type': 'investment_recommendations', 'input_size': 166, 'output_size': 4879, 'status': 'success'}
+2025-10-03 14:03:58 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:03:58,599 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:05,440 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:05,442 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:05,811 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:05,818 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:05,838 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:05 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:05,999 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:07,470 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:07,472 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:07,742 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:07,750 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:07,771 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:07 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:07,854 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:08,552 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:08,553 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:08,829 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:08,840 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:08,856 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:08 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:08,945 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:10,632 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:10,633 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:10,938 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:10,947 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:10,964 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:11 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:11,050 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:15,358 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:15,359 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:15,636 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:15,649 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:15,666 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:15 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:15,870 - RealEstateAI - INFO - User interaction: page_view
+2025-10-03 14:04:16,992 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:16,993 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:17,263 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:17,275 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:17,289 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-03 14:04:17,385 - ml_model - ERROR - Error making prediction: Must pass 2-d input. shape=(1, 1, 7)
+2025-10-03 14:04:23,565 - gemini_ai - INFO - Gemini AI interaction logged: {'timestamp': '2025-10-03T14:04:23.565916', 'interaction_type': 'property_market_analysis', 'input_size': 128, 'output_size': 118, 'status': 'success'}
+2025-10-03 14:04:23 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-03 14:04:23,567 - RealEstateAI - INFO - User interaction: page_view
