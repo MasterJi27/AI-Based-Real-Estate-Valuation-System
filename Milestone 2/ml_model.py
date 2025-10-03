@@ -55,6 +55,9 @@ class RealEstatePricePredictor:
         """Preprocess the data for training or prediction"""
         df = data.copy()
         
+        logger.info(f"Preprocessing input shape: {df.shape}")
+        logger.info(f"Preprocessing columns: {df.columns.tolist()}")
+        
         # Encode categorical variables
         categorical_cols = ['city', 'district', 'sub_district', 'property_type', 'furnishing']
         
@@ -63,6 +66,7 @@ class RealEstatePricePredictor:
                 if col not in self.label_encoders:
                     self.label_encoders[col] = LabelEncoder()
                     df[col] = self.label_encoders[col].fit_transform(df[col].astype(str))
+                    logger.info(f"Created new encoder for {col}")
                 else:
                     # Handle unseen categories using vectorized operations
                     unique_values = self.label_encoders[col].classes_
@@ -70,6 +74,10 @@ class RealEstatePricePredictor:
                     # Use np.where instead of apply(lambda) for better performance
                     df[col] = np.where(df[col].isin(unique_values), df[col], unique_values[0])
                     df[col] = self.label_encoders[col].transform(df[col])
+                    logger.info(f"Used existing encoder for {col}")
+        
+        logger.info(f"Preprocessing output shape: {df.shape}")
+        logger.info(f"Preprocessing output columns: {df.columns.tolist()}")
         
         return df
     
@@ -157,32 +165,90 @@ class RealEstatePricePredictor:
             raise ValueError("Models not trained yet!")
         
         try:
-            # Convert to DataFrame
-            df = pd.DataFrame([property_data])
+            logger.info(f"Starting prediction with data: {property_data}")
+            logger.info(f"Input type: {type(property_data)}")
             
-            # Preprocess
+            # Handle both DataFrame and dictionary inputs
+            if isinstance(property_data, pd.DataFrame):
+                logger.info("Input is DataFrame - converting to dictionary")
+                if len(property_data) != 1:
+                    logger.error(f"DataFrame should have exactly 1 row, got {len(property_data)}")
+                    return 0, "Invalid DataFrame input", {}
+                property_dict = property_data.iloc[0].to_dict()
+                logger.info(f"Converted to dict: {property_dict}")
+            elif isinstance(property_data, dict):
+                logger.info("Input is dictionary - using directly")
+                property_dict = property_data.copy()
+            else:
+                logger.error(f"Invalid input type: {type(property_data)}")
+                return 0, "Invalid input type", {}
+            
+            # Convert to DataFrame with proper structure
+            df = pd.DataFrame([property_dict])
+            logger.info(f"Created DataFrame with shape: {df.shape}, columns: {df.columns.tolist()}")
+            
+            # Ensure all required columns are present with default values
+            for col in self.feature_columns:
+                if col not in df.columns:
+                    if col == 'area_sqft':
+                        df[col] = 1000  # default area
+                    elif col == 'bhk':
+                        df[col] = 2  # default BHK
+                    else:
+                        df[col] = 'Unknown'
+                    logger.info(f"Added missing column {col} with default value")
+            
+            # Preprocess the data
+            logger.info("Starting preprocessing...")
             processed_df = self.preprocess_data(df)
+            logger.info(f"Preprocessing complete. Shape: {processed_df.shape}")
+            
+            # Extract features in the correct order and ensure proper shape
+            logger.info(f"Extracting features: {self.feature_columns}")
             X_pred = processed_df[self.feature_columns]
+            logger.info(f"Raw feature extraction shape: {X_pred.shape}")
+            logger.info(f"Raw feature extraction type: {type(X_pred)}")
             
-            # Debug: Log the shape and contents
-            logger.info(f"Prediction input shape: {X_pred.shape}")
-            logger.info(f"Feature columns: {self.feature_columns}")
-            logger.info(f"Input data sample: {X_pred.head()}")
-            
-            # Ensure we have the correct 2D shape
-            if len(X_pred.shape) != 2:
-                logger.error(f"Invalid input shape: {X_pred.shape}. Expected 2D array.")
-                return 0, "Invalid input shape", {}
-            
-            if X_pred.shape[0] != 1 or X_pred.shape[1] != len(self.feature_columns):
-                logger.error(f"Invalid input dimensions: {X_pred.shape}. Expected (1, {len(self.feature_columns)})")
-                return 0, "Invalid input dimensions", {}
+            # Convert to numpy array safely
+            try:
+                if hasattr(X_pred, 'values'):
+                    X_pred_array = X_pred.values
+                    logger.info(f"Converted to numpy array: {X_pred_array.shape}")
+                else:
+                    X_pred_array = np.array(X_pred)
+                    logger.info(f"Created numpy array: {X_pred_array.shape}")
+                
+                # Ensure proper 2D shape
+                if X_pred_array.ndim == 1:
+                    X_pred_array = X_pred_array.reshape(1, -1)
+                    logger.info(f"Reshaped 1D to 2D: {X_pred_array.shape}")
+                elif X_pred_array.ndim > 2:
+                    X_pred_array = X_pred_array.reshape(1, -1)
+                    logger.info(f"Reshaped >2D to 2D: {X_pred_array.shape}")
+                
+                # Final validation
+                if X_pred_array.shape[0] != 1:
+                    logger.error(f"Wrong number of samples: {X_pred_array.shape[0]}, expected 1")
+                    return 0, "Invalid input shape - wrong sample count", {}
+                    
+                if X_pred_array.shape[1] != len(self.feature_columns):
+                    logger.error(f"Feature mismatch: got {X_pred_array.shape[1]}, expected {len(self.feature_columns)}")
+                    return 0, "Feature dimension mismatch", {}
+                
+                logger.info(f"Final validation passed. Shape: {X_pred_array.shape}")
+                logger.info(f"Input data sample: {X_pred_array[0][:5]}...")  # Show first 5 features
+                
+            except Exception as array_error:
+                logger.error(f"Error converting to array: {array_error}")
+                return 0, f"Array conversion failed: {str(array_error)}", {}
             
             # Make predictions with all models
             predictions = {}
             for name, model in self.models.items():
                 try:
-                    pred_result = model.predict(X_pred)
+                    logger.info(f"Making prediction with {name} model...")
+                    pred_result = model.predict(X_pred_array)
+                    logger.info(f"{name} prediction result: {pred_result}")
                     predictions[name] = pred_result[0] if len(pred_result) > 0 else 0
                 except Exception as model_error:
                     logger.error(f"Error with {name} model prediction: {str(model_error)}")

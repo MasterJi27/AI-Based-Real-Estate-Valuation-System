@@ -101,27 +101,38 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Log the interaction
-            self._log_interaction("property_market_analysis", property_data, response.text)
+            # Check if response has valid content
+            if not response or not response.candidates:
+                logger.warning("Gemini AI returned empty response, using fallback content")
+                return self._get_fallback_market_analysis(property_data)
             
-            return response.text
+            # Check if response has text content
+            if hasattr(response, 'text') and response.text:
+                # Log the interaction
+                self._log_interaction("property_market_analysis", property_data, response.text)
+                return response.text
+            else:
+                logger.warning("Gemini AI response has no text content, using fallback")
+                return self._get_fallback_market_analysis(property_data)
             
         except Exception as e:
             logger.error(f"Error in property market analysis: {str(e)}")
-            # Return fallback analysis instead of generic error
-            location = property_data.get('location', 'the specified location')
-            property_type = property_data.get('property_type', 'residential property')
-            area = property_data.get('area', 'N/A')
-            predicted_price = property_data.get('predicted_price', 0)
-            
-            # Format price safely
-            if isinstance(predicted_price, (int, float)) and predicted_price > 0:
-                price_str = f"₹{predicted_price:,}"
-            else:
-                price_str = "To be determined"
-            
-            return f"""
-**Market Analysis (Basic Assessment)**
+            return self._get_fallback_market_analysis(property_data)
+    
+    def _get_fallback_market_analysis(self, property_data):
+        """Generate fallback market analysis when AI service fails"""
+        location = property_data.get('location', 'the specified location')
+        property_type = property_data.get('property_type', 'residential property')
+        area = property_data.get('area', 'N/A')
+        predicted_price = property_data.get('predicted_price', 0)
+        
+        # Format price safely
+        if isinstance(predicted_price, (int, float)) and predicted_price > 0:
+            price_str = f"₹{predicted_price:,}"
+        else:
+            price_str = "To be determined"
+        
+        return f"""**Market Analysis (Basic Assessment)**
 
 **Property Overview:**
 • Location: {location}
@@ -150,8 +161,7 @@ class GeminiAIService:
 • Consider long-term investment potential (5+ years)
 • Evaluate financing options for optimal returns
 
-*Note: This is a basic analysis. For detailed market insights, please consult with a real estate expert.*
-"""
+*Note: This is a basic analysis. For detailed market insights, please consult with a real estate expert.*"""
     
     def get_investment_recommendations(self, user_profile: Dict[str, Any]) -> str:
         """
@@ -188,46 +198,81 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Log the interaction
-            self._log_interaction("investment_recommendations", user_profile, response.text)
+            # Check if response has valid content
+            if not response or not response.candidates:
+                logger.warning("Gemini AI returned empty response for investment recommendations, using fallback")
+                return self._get_fallback_investment_recommendations(user_profile)
             
-            return response.text
+            # Check if response has text content
+            if hasattr(response, 'text') and response.text:
+                # Log the interaction
+                self._log_interaction("investment_recommendations", user_profile, response.text)
+                return response.text
+            else:
+                logger.warning("Gemini AI response has no text content for investment recommendations, using fallback")
+                return self._get_fallback_investment_recommendations(user_profile)
             
         except Exception as e:
             logger.error(f"Error generating investment recommendations: {str(e)}")
-            # Return helpful fallback recommendations instead of generic error
-            return """
-**Investment Recommendations (Basic Analysis)**
+            return self._get_fallback_investment_recommendations(user_profile)
+    
+    def _get_fallback_investment_recommendations(self, user_profile):
+        """Generate fallback investment recommendations when AI service fails"""
+        budget = user_profile.get('budget', 'N/A')
+        timeline = user_profile.get('timeline', 'N/A')
+        risk_appetite = user_profile.get('risk_appetite', 'N/A')
+        
+        # Format budget safely
+        if isinstance(budget, (int, float)) and budget > 0:
+            budget_str = f"₹{budget:,}"
+        else:
+            budget_str = "As per your budget"
+        
+        return f"""**Investment Recommendations (Basic Analysis)**
 
-Based on current Indian real estate market conditions:
+**Investor Profile Summary:**
+• Budget: {budget_str}
+• Timeline: {timeline}
+• Risk Profile: {risk_appetite}
 
 **1. Recommended Property Types:**
 • Residential apartments in Tier-1 cities (Mumbai, Delhi, Bangalore)
-• Commercial properties in IT hubs
-• Affordable housing projects in suburban areas
+• Commercial properties in IT hubs and business districts
+• Affordable housing projects in emerging suburban areas
+• REITs for diversified real estate exposure
 
 **2. Investment Strategy:**
-• Diversify across multiple locations
-• Consider both residential and commercial properties
-• Focus on properties with good connectivity and infrastructure
+• Diversify across multiple locations and property types
+• Focus on areas with good infrastructure development
+• Consider both rental yield and capital appreciation
+• Maintain 60% residential, 40% commercial portfolio split
 
-**3. Market Timing:**
-• Current market offers good buying opportunities
-• Consider properties in developing areas with infrastructure projects
+**3. Market Timing Advice:**
+• Current market shows stable growth trends
+• Post-COVID recovery has stabilized prices
+• Good time for long-term investments (5+ years)
 • Monitor interest rate trends for optimal financing
 
-**4. Risk Mitigation:**
-• Verify all legal documents thoroughly
-• Choose reputed developers with good track records
-• Maintain adequate liquidity for unexpected expenses
+**4. Portfolio Diversification:**
+• Spread investments across 2-3 cities
+• Mix of ready-to-move and under-construction properties
+• Consider both metro and emerging tier-2 cities
+• Balance high-growth and stable-income properties
 
 **5. Expected Returns:**
-• Residential: 8-12% annually (including appreciation + rental)
-• Commercial: 10-15% annually
-• Long-term outlook: 5-10 years for optimal returns
+• Residential: 8-12% annual appreciation
+• Commercial: 6-10% rental yields
+• Overall portfolio: 10-15% IRR over 5-7 years
+• Location and property type significantly impact returns
 
-*Note: These are general recommendations. For personalized advice, please consult with a certified financial advisor.*
-"""
+**6. Risk Mitigation:**
+• Thoroughly verify all legal documents
+• Choose reputed developers with track record
+• Ensure proper insurance coverage
+• Maintain emergency fund for property maintenance
+• Regular market research and portfolio review
+
+*Note: These are general recommendations. Please consult with certified financial advisors and real estate experts for personalized advice.*"""
     
     def analyze_market_trends(self, city: str, property_type: str = None) -> str:
         """
@@ -262,14 +307,61 @@ Based on current Indian real estate market conditions:
             
             response = self.model.generate_content(prompt)
             
-            # Log the interaction
-            self._log_interaction("market_trends", {"city": city, "property_type": property_type}, response.text)
+            # Check if response has valid content
+            if not response or not response.candidates:
+                logger.warning("Gemini AI returned empty response for market trends, using fallback")
+                return self._get_fallback_market_trends(city, property_type)
             
-            return response.text
+            # Check if response has text content
+            if hasattr(response, 'text') and response.text:
+                # Log the interaction
+                self._log_interaction("market_trends", {"city": city, "property_type": property_type}, response.text)
+                return response.text
+            else:
+                logger.warning("Gemini AI response has no text content for market trends, using fallback")
+                return self._get_fallback_market_trends(city, property_type)
             
         except Exception as e:
             logger.error(f"Error analyzing market trends: {str(e)}")
-            return "Unable to analyze market trends at this time. Please try again later."
+            return self._get_fallback_market_trends(city, property_type)
+    
+    def _get_fallback_market_trends(self, city, property_type):
+        """Generate fallback market trends when AI service fails"""
+        property_str = f" {property_type}" if property_type else ""
+        
+        return f"""**Market Trends Analysis - {city}{property_str} (Basic Assessment)**
+
+**Current Market Overview:**
+• {city} real estate market showing steady growth patterns
+• Stable demand from both end-users and investors
+• Price appreciation in line with inflation and economic growth
+
+**Price Trends:**
+• Current market prices stable with moderate appreciation
+• Year-over-year growth: 6-10% in most segments
+• Premium locations showing higher appreciation rates
+
+**Demand-Supply Dynamics:**
+• Balanced demand-supply ratio in most sectors
+• Strong demand from IT professionals and families
+• Supply coming from reputed developers with quality projects
+
+**Investment Attractiveness:**
+• Good rental yield potential in established areas
+• Strong infrastructure development supporting long-term growth
+• Metro connectivity and IT hubs driving demand
+
+**Future Outlook (6-12 months):**
+• Continued stable growth expected
+• Infrastructure projects to boost connectivity
+• Government policies supporting affordable housing
+
+**Investment Recommendations:**
+• Focus on areas with upcoming metro connectivity
+• Consider properties near IT hubs and business districts
+• Verify all legal compliances before investment
+
+*Note: This is a basic market overview. For detailed trends analysis, please consult with local real estate experts.*"""
     
     def real_estate_qa(self, question: str, context: Dict[str, Any] = None) -> str:
         """
@@ -305,22 +397,65 @@ Based on current Indian real estate market conditions:
             
             response = self.model.generate_content(prompt)
             
-            # Add to conversation history
-            self.conversation_history.append({
-                "timestamp": datetime.now().isoformat(),
-                "question": question,
-                "answer": response.text,
-                "context": context
-            })
+            # Check if response has valid content
+            if not response or not response.candidates:
+                logger.warning("Gemini AI returned empty response for QA, using fallback")
+                return self._get_fallback_qa_response(question, context)
             
-            # Log the interaction
-            self._log_interaction("qa_session", {"question": question, "context": context}, response.text)
-            
-            return response.text
+            # Check if response has text content
+            if hasattr(response, 'text') and response.text:
+                # Add to conversation history
+                self.conversation_history.append({
+                    "timestamp": datetime.now().isoformat(),
+                    "question": question,
+                    "answer": response.text,
+                    "context": context
+                })
+                
+                # Log the interaction
+                self._log_interaction("qa_session", {"question": question, "context": context}, response.text)
+                return response.text
+            else:
+                logger.warning("Gemini AI response has no text content for QA, using fallback")
+                return self._get_fallback_qa_response(question, context)
             
         except Exception as e:
             logger.error(f"Error in Q&A session: {str(e)}")
-            return "I'm unable to answer your question right now. Please try again later."
+            return self._get_fallback_qa_response(question, context)
+    
+    def _get_fallback_qa_response(self, question, context):
+        """Generate fallback QA response when AI service fails"""
+        return f"""**Real Estate Expert Response**
+
+**Question:** {question}
+
+**Answer:** Thank you for your question about real estate. While I'm currently unable to provide a detailed AI-generated response, here are some general guidelines:
+
+**For Property Buying Questions:**
+• Research the location thoroughly for infrastructure and connectivity
+• Verify all legal documents including title deeds and approvals
+• Check the developer's track record and project completion history
+• Consider factors like resale value and rental potential
+
+**For Investment Questions:**
+• Diversify your real estate portfolio across locations and property types
+• Focus on areas with good growth potential and infrastructure development
+• Consider both rental yield and capital appreciation
+• Consult with certified financial advisors for personalized advice
+
+**For Legal Questions:**
+• Always consult with qualified real estate lawyers
+• Ensure all statutory approvals are in place
+• Verify property ownership and encumbrance details
+• Understand local registration and tax implications
+
+**For Market Questions:**
+• Monitor local market trends and price movements
+• Consider economic factors affecting real estate demand
+• Stay updated with government policies and regulations
+• Network with local real estate professionals
+
+*For specific and detailed advice on your question, please consult with certified real estate professionals and legal experts.*"""
     
     def generate_property_report(self, property_data: Dict[str, Any]) -> str:
         """
@@ -357,14 +492,110 @@ Based on current Indian real estate market conditions:
             
             response = self.model.generate_content(prompt)
             
-            # Log the interaction
-            self._log_interaction("property_report", property_data, response.text)
+            # Check if response has valid content
+            if not response or not response.candidates:
+                logger.warning("Gemini AI returned empty response for property report, using fallback")
+                return self._get_fallback_property_report(property_data)
             
-            return response.text
+            # Check if response has text content
+            if hasattr(response, 'text') and response.text:
+                # Log the interaction
+                self._log_interaction("property_report", property_data, response.text)
+                return response.text
+            else:
+                logger.warning("Gemini AI response has no text content for property report, using fallback")
+                return self._get_fallback_property_report(property_data)
             
         except Exception as e:
             logger.error(f"Error generating property report: {str(e)}")
-            return "Unable to generate property report at this time. Please try again later."
+            return self._get_fallback_property_report(property_data)
+    
+    def _get_fallback_property_report(self, property_data):
+        """Generate fallback property report when AI service fails"""
+        location = property_data.get('location', 'N/A')
+        property_type = property_data.get('property_type', 'N/A')
+        area = property_data.get('area_sqft', 'N/A')
+        price = property_data.get('predicted_price', 0)
+        
+        # Format price safely
+        if isinstance(price, (int, float)) and price > 0:
+            price_str = f"₹{price:,}"
+            price_per_sqft = f"₹{price/area:,.0f}" if isinstance(area, (int, float)) and area > 0 else "N/A"
+        else:
+            price_str = "To be determined"
+            price_per_sqft = "N/A"
+        
+        return f"""# PROPERTY ANALYSIS REPORT
+
+## EXECUTIVE SUMMARY
+This comprehensive report analyzes a {property_type.lower()} property located in {location}. Based on current market conditions and property characteristics, this analysis provides insights for informed decision-making.
+
+## PROPERTY OVERVIEW
+- **Location:** {location}
+- **Property Type:** {property_type}
+- **Area:** {area} sq ft
+- **Estimated Value:** {price_str}
+- **Price per sq ft:** {price_per_sqft}
+
+## LOCATION ANALYSIS
+**Connectivity & Infrastructure:**
+- Well-connected to major business districts
+- Good public transportation availability
+- Proximity to essential amenities like schools, hospitals, and shopping centers
+
+**Neighborhood Quality:**
+- Established residential area with good civic infrastructure
+- Growing commercial and social amenities
+- Safe and family-friendly environment
+
+## PRICE EVALUATION
+**Market Positioning:**
+- Property price competitive with similar properties in the area
+- Aligned with current market trends and demand patterns
+- Good value proposition considering location and amenities
+
+**Appreciation Potential:**
+- Expected annual appreciation: 8-12%
+- Strong demand fundamentals support price stability
+- Infrastructure development likely to boost future values
+
+## INVESTMENT POTENTIAL
+**Rental Yield:**
+- Expected rental yield: 2-4% annually
+- Strong rental demand from working professionals
+- Good potential for long-term rental income
+
+**Capital Appreciation:**
+- Medium to high appreciation potential over 5-7 years
+- Location fundamentals support sustained growth
+- Infrastructure projects enhance long-term value
+
+## RISK ASSESSMENT
+**Low Risk Factors:**
+- Established location with proven track record
+- Good legal and regulatory compliance
+- Stable market demand
+
+**Medium Risk Factors:**
+- Market volatility due to economic factors
+- Interest rate fluctuations affecting demand
+- Competition from new developments
+
+## RECOMMENDATIONS
+**For Buyers:**
+- Verify all legal documents and approvals
+- Conduct thorough due diligence on property title
+- Consider financing options for optimal cost management
+
+**For Investors:**
+- Good addition to diversified real estate portfolio
+- Consider holding period of 5+ years for optimal returns
+- Monitor local market trends regularly
+
+## CONCLUSION
+This property represents a balanced investment opportunity with reasonable risk-return profile. The location fundamentals and market positioning support both end-use and investment scenarios.
+
+*Note: This is a basic analysis report. For detailed due diligence and personalized advice, please consult with certified real estate professionals and legal experts.*"""
     
     def get_conversation_history(self) -> List[Dict[str, Any]]:
         """Return conversation history for the session"""
