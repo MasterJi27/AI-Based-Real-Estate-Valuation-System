@@ -23,12 +23,14 @@ class DatabaseManager:
         self.init_database()
     
     def get_connection(self):
-        """Get database connection"""
-        if not self.connection_available:
-            return None
+        """Get database connection with automatic retry"""
         try:
-            return psycopg2.connect(**self.connection_params)
-        except Exception:
+            # Try to establish connection
+            conn = psycopg2.connect(**self.connection_params)
+            self.connection_available = True
+            return conn
+        except Exception as e:
+            logger.warning(f"Database connection failed: {str(e)}")
             self.connection_available = False
             return None
     

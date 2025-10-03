@@ -164,10 +164,34 @@ class RealEstatePricePredictor:
             processed_df = self.preprocess_data(df)
             X_pred = processed_df[self.feature_columns]
             
+            # Debug: Log the shape and contents
+            logger.info(f"Prediction input shape: {X_pred.shape}")
+            logger.info(f"Feature columns: {self.feature_columns}")
+            logger.info(f"Input data sample: {X_pred.head()}")
+            
+            # Ensure we have the correct 2D shape
+            if len(X_pred.shape) != 2:
+                logger.error(f"Invalid input shape: {X_pred.shape}. Expected 2D array.")
+                return 0, "Invalid input shape", {}
+            
+            if X_pred.shape[0] != 1 or X_pred.shape[1] != len(self.feature_columns):
+                logger.error(f"Invalid input dimensions: {X_pred.shape}. Expected (1, {len(self.feature_columns)})")
+                return 0, "Invalid input dimensions", {}
+            
             # Make predictions with all models
             predictions = {}
             for name, model in self.models.items():
-                predictions[name] = model.predict(X_pred)[0]
+                try:
+                    pred_result = model.predict(X_pred)
+                    predictions[name] = pred_result[0] if len(pred_result) > 0 else 0
+                except Exception as model_error:
+                    logger.error(f"Error with {name} model prediction: {str(model_error)}")
+                    predictions[name] = 0
+            
+            # Check if we have valid predictions
+            if not predictions or all(pred == 0 for pred in predictions.values()):
+                logger.error("All model predictions failed or returned zero")
+                return 0, "Prediction models failed", {}
             
             # Ensemble prediction using weights
             ensemble_prediction = sum(
@@ -182,7 +206,7 @@ class RealEstatePricePredictor:
             return ensemble_prediction, investment_advice, predictions
             
         except Exception as e:
-            logger.info(f"Error making prediction: {str(e)}")
+            logger.error(f"Error making prediction: {str(e)}")
             return 0, "Unable to determine", {}
     
     def _generate_investment_advice(self, property_data, predicted_price):
