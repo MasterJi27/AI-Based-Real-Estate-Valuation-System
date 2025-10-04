@@ -1202,3 +1202,197 @@ connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection re
 2025-10-03 16:24:35,697 - gemini_ai - INFO - Gemini AI interaction logged: {'timestamp': '2025-10-03T16:24:35.697670', 'interaction_type': 'investment_recommendations', 'input_size': 166, 'output_size': 4712, 'status': 'success'}
 2025-10-03 16:24:35 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
 2025-10-03 16:24:35,699 - RealEstateAI - INFO - User interaction: page_view
+2025-10-04 06:03:29,775 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:29,780 - database - INFO - Database connection not available. Running without database.
+2025-10-04 06:03:30,115 - data_loader - INFO - Raw rows before cleaning: 100
+2025-10-04 06:03:30,121 - data_loader - INFO - Rows after cleaning: 100
+2025-10-04 06:03:30,121 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-10-04 06:03:30,123 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-04 06:03:30,126 - data_loader - INFO - Rows after cleaning: 106
+2025-10-04 06:03:30,127 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-10-04 06:03:30,129 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-04 06:03:30,132 - data_loader - INFO - Rows after cleaning: 106
+2025-10-04 06:03:30,132 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-10-04 06:03:30,134 - data_loader - INFO - Raw rows before cleaning: 108
+2025-10-04 06:03:30,137 - data_loader - INFO - Rows after cleaning: 108
+2025-10-04 06:03:30,137 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-10-04 06:03:30,139 - data_loader - INFO - Raw rows before cleaning: 105
+2025-10-04 06:03:30,142 - data_loader - INFO - Rows after cleaning: 105
+2025-10-04 06:03:30,142 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-10-04 06:03:30,143 - data_loader - INFO - Total valid rows loaded: 525
+2025-10-04 06:03:30,146 - ml_model - INFO - Preprocessing input shape: (525, 8)
+2025-10-04 06:03:30,146 - ml_model - INFO - Preprocessing columns: ['district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price', 'city']
+2025-10-04 06:03:30,147 - ml_model - INFO - Created new encoder for city
+2025-10-04 06:03:30,148 - ml_model - INFO - Created new encoder for district
+2025-10-04 06:03:30,149 - ml_model - INFO - Created new encoder for sub_district
+2025-10-04 06:03:30,150 - ml_model - INFO - Created new encoder for property_type
+2025-10-04 06:03:30,151 - ml_model - INFO - Created new encoder for furnishing
+2025-10-04 06:03:30,151 - ml_model - INFO - Preprocessing output shape: (525, 8)
+2025-10-04 06:03:30,151 - ml_model - INFO - Preprocessing output columns: ['district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price', 'city']
+2025-10-04 06:03:30,471 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:30,471 - database - INFO - Database connection not available. Skipping data loading.
+2025-10-04 06:03:30 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-10-04 06:03:30,471 - RealEstateAI - INFO - User interaction: data_loaded
+2025-10-04 06:03:30,475 - gemini_ai - INFO - Gemini AI service initialized successfully
+2025-10-04 06:03:30,476 - gemini_ai - INFO - Gemini AI service initialized and cached in session state
+2025-10-04 06:03:30,479 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:30,480 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:31,023 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:31,029 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:31,043 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:03:31 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-04 06:03:31,146 - RealEstateAI - INFO - User interaction: page_view
+2025-10-04 06:05:39,581 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:05:39,582 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:05:39,990 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:05:40,002 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:05:40,022 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:05:40,242 - ml_model - INFO - Starting prediction with data:      city district sub_district  area_sqft  bhk property_type      furnishing
+0  Mumbai   Mumbai       Mumbai       1000    1     Apartment  Semi-Furnished
+2025-10-04 06:05:40,242 - ml_model - INFO - Input type: <class 'pandas.core.frame.DataFrame'>
+2025-10-04 06:05:40,242 - ml_model - INFO - Input is DataFrame - converting to dictionary
+2025-10-04 06:05:40,243 - ml_model - INFO - Converted to dict: {'city': 'Mumbai', 'district': 'Mumbai', 'sub_district': 'Mumbai', 'area_sqft': 1000, 'bhk': 1, 'property_type': 'Apartment', 'furnishing': 'Semi-Furnished'}
+2025-10-04 06:05:40,244 - ml_model - INFO - Created DataFrame with shape: (1, 7), columns: ['city', 'district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing']
+2025-10-04 06:05:40,244 - ml_model - INFO - Starting preprocessing...
+2025-10-04 06:05:40,244 - ml_model - INFO - Preprocessing input shape: (1, 7)
+2025-10-04 06:05:40,244 - ml_model - INFO - Preprocessing columns: ['city', 'district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing']
+2025-10-04 06:05:40,245 - ml_model - INFO - Used existing encoder for city
+2025-10-04 06:05:40,246 - ml_model - INFO - Used existing encoder for district
+2025-10-04 06:05:40,248 - ml_model - INFO - Used existing encoder for sub_district
+2025-10-04 06:05:40,250 - ml_model - INFO - Used existing encoder for property_type
+2025-10-04 06:05:40,252 - ml_model - INFO - Used existing encoder for furnishing
+2025-10-04 06:05:40,252 - ml_model - INFO - Preprocessing output shape: (1, 7)
+2025-10-04 06:05:40,253 - ml_model - INFO - Preprocessing output columns: ['city', 'district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing']
+2025-10-04 06:05:40,253 - ml_model - INFO - Preprocessing complete. Shape: (1, 7)
+2025-10-04 06:05:40,253 - ml_model - INFO - Extracting features: ['city', 'district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing']
+2025-10-04 06:05:40,254 - ml_model - INFO - Raw feature extraction shape: (1, 7)
+2025-10-04 06:05:40,254 - ml_model - INFO - Raw feature extraction type: <class 'pandas.core.frame.DataFrame'>
+2025-10-04 06:05:40,255 - ml_model - INFO - Converted to numpy array: (1, 7)
+2025-10-04 06:05:40,255 - ml_model - INFO - Final validation passed. Shape: (1, 7)
+2025-10-04 06:05:40,255 - ml_model - INFO - Input data sample: [   3    0    0 1000    1]...
+2025-10-04 06:05:40,255 - ml_model - INFO - Making prediction with decision_tree model...
+2025-10-04 06:05:40,256 - ml_model - INFO - decision_tree prediction result: [12277777.77777778]
+2025-10-04 06:05:40,256 - ml_model - INFO - Making prediction with random_forest model...
+2025-10-04 06:05:40,280 - ml_model - INFO - random_forest prediction result: [9594686.88949939]
+2025-10-04 06:05:40,280 - ml_model - INFO - Making prediction with xgboost model...
+2025-10-04 06:05:40,281 - ml_model - INFO - xgboost prediction result: [1.066383e+07]
+2025-10-04 06:05:46,617 - gemini_ai - WARNING - property_market_analysis: Candidate 0 finish_reason=2
+2025-10-04 06:05:46,617 - gemini_ai - WARNING - property_market_analysis: Response was cut off due to MAX_TOKENS
+2025-10-04 06:05:46,618 - gemini_ai - ERROR - property_market_analysis: Exception while extracting response text: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-10-04 06:05:46,618 - gemini_ai - WARNING - Could not extract valid response from Gemini AI, using fallback content
+2025-10-04 06:05:46 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-04 06:05:46,619 - RealEstateAI - INFO - User interaction: page_view
+2025-10-04 06:12:44,544 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:44,544 - database - INFO - Database connection not available. Running without database.
+2025-10-04 06:12:44,741 - data_loader - INFO - Raw rows before cleaning: 100
+2025-10-04 06:12:44,744 - data_loader - INFO - Rows after cleaning: 100
+2025-10-04 06:12:44,745 - data_loader - INFO - Mumbai: Loaded 100 valid rows.
+2025-10-04 06:12:44,746 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-04 06:12:44,749 - data_loader - INFO - Rows after cleaning: 106
+2025-10-04 06:12:44,749 - data_loader - INFO - Delhi: Loaded 106 valid rows.
+2025-10-04 06:12:44,752 - data_loader - INFO - Raw rows before cleaning: 106
+2025-10-04 06:12:44,754 - data_loader - INFO - Rows after cleaning: 106
+2025-10-04 06:12:44,755 - data_loader - INFO - Gurugram: Loaded 106 valid rows.
+2025-10-04 06:12:44,756 - data_loader - INFO - Raw rows before cleaning: 108
+2025-10-04 06:12:44,759 - data_loader - INFO - Rows after cleaning: 108
+2025-10-04 06:12:44,760 - data_loader - INFO - Noida: Loaded 108 valid rows.
+2025-10-04 06:12:44,762 - data_loader - INFO - Raw rows before cleaning: 105
+2025-10-04 06:12:44,767 - data_loader - INFO - Rows after cleaning: 105
+2025-10-04 06:12:44,767 - data_loader - INFO - Bangalore: Loaded 105 valid rows.
+2025-10-04 06:12:44,768 - data_loader - INFO - Total valid rows loaded: 525
+2025-10-04 06:12:44,771 - ml_model - INFO - Preprocessing input shape: (525, 8)
+2025-10-04 06:12:44,771 - ml_model - INFO - Preprocessing columns: ['district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price', 'city']
+2025-10-04 06:12:44,773 - ml_model - INFO - Created new encoder for city
+2025-10-04 06:12:44,773 - ml_model - INFO - Created new encoder for district
+2025-10-04 06:12:44,776 - ml_model - INFO - Created new encoder for sub_district
+2025-10-04 06:12:44,777 - ml_model - INFO - Created new encoder for property_type
+2025-10-04 06:12:44,777 - ml_model - INFO - Created new encoder for furnishing
+2025-10-04 06:12:44,777 - ml_model - INFO - Preprocessing output shape: (525, 8)
+2025-10-04 06:12:44,778 - ml_model - INFO - Preprocessing output columns: ['district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price', 'city']
+2025-10-04 06:12:45,044 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45,045 - database - INFO - Database connection not available. Skipping data loading.
+2025-10-04 06:12:45 - RealEstateAI - INFO - production_logging.py:93 - User interaction: data_loaded
+2025-10-04 06:12:45,045 - RealEstateAI - INFO - User interaction: data_loaded
+2025-10-04 06:12:45,051 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45,052 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45,438 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45,443 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45,458 - database - WARNING - Database connection failed: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-10-04 06:12:45 - RealEstateAI - INFO - production_logging.py:93 - User interaction: page_view
+2025-10-04 06:12:45,561 - RealEstateAI - INFO - User interaction: page_view

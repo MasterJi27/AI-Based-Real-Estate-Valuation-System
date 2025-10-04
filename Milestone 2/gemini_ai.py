@@ -65,6 +65,82 @@ class GeminiAIService:
             logger.error(f"Failed to initialize Gemini AI: {str(e)}")
             raise
     
+    def _safe_extract_response_text(self, response, operation_name: str = "unknown") -> Optional[str]:
+        """
+        Safely extract text from Gemini AI response with comprehensive error handling
+        
+        Args:
+            response: Gemini AI response object
+            operation_name: Name of the operation for logging
+            
+        Returns:
+            Extracted text or None if response is invalid
+        """
+        try:
+            # Check if response exists
+            if not response:
+                logger.warning(f"{operation_name}: Response is None or empty")
+                return None
+            
+            # Check for candidates (parts of response)
+            if not hasattr(response, 'candidates') or not response.candidates:
+                logger.warning(f"{operation_name}: No candidates in response")
+                if hasattr(response, 'prompt_feedback'):
+                    logger.warning(f"{operation_name}: Prompt feedback: {response.prompt_feedback}")
+                return None
+            
+            # Check finish_reason for each candidate
+            for idx, candidate in enumerate(response.candidates):
+                if hasattr(candidate, 'finish_reason'):
+                    finish_reason = candidate.finish_reason
+                    # finish_reason: 0=UNSPECIFIED, 1=STOP (normal), 2=MAX_TOKENS, 3=SAFETY, 4=RECITATION, 5=OTHER
+                    if finish_reason not in [0, 1]:  # 0=UNSPECIFIED (ok), 1=STOP (normal completion)
+                        logger.warning(f"{operation_name}: Candidate {idx} finish_reason={finish_reason}")
+                        if finish_reason == 2:
+                            logger.warning(f"{operation_name}: Response was cut off due to MAX_TOKENS")
+                        elif finish_reason == 3:
+                            logger.warning(f"{operation_name}: Response blocked due to SAFETY concerns")
+                        elif finish_reason == 4:
+                            logger.warning(f"{operation_name}: Response blocked due to RECITATION")
+                        else:
+                            logger.warning(f"{operation_name}: Response stopped for OTHER reasons")
+            
+            # Try to extract text using the quick accessor
+            if hasattr(response, 'text'):
+                try:
+                    text = response.text
+                    if text and isinstance(text, str) and text.strip():
+                        return text
+                    else:
+                        logger.warning(f"{operation_name}: response.text is empty or invalid")
+                        return None
+                except ValueError as e:
+                    # This happens when response.text fails due to invalid parts
+                    logger.warning(f"{operation_name}: Failed to access response.text: {str(e)}")
+                    
+                    # Try to manually extract from candidates
+                    if response.candidates:
+                        for candidate in response.candidates:
+                            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                                parts_text = []
+                                for part in candidate.content.parts:
+                                    if hasattr(part, 'text') and part.text:
+                                        parts_text.append(part.text)
+                                if parts_text:
+                                    combined_text = ''.join(parts_text)
+                                    logger.info(f"{operation_name}: Manually extracted text from parts")
+                                    return combined_text
+                    
+                    logger.warning(f"{operation_name}: Could not extract text from any candidate parts")
+                    return None
+            else:
+                logger.warning(f"{operation_name}: Response object has no 'text' attribute")
+                return None
+                
+        except Exception as e:
+            logger.error(f"{operation_name}: Exception while extracting response text: {str(e)}")
+            return None
+    
     def analyze_property_market(self, property_data: Dict[str, Any]) -> str:
         """
         Analyze property market conditions and provide insights
@@ -101,18 +177,15 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Check if response has valid content
-            if not response or not response.candidates:
-                logger.warning("Gemini AI returned empty response, using fallback content")
-                return self._get_fallback_market_analysis(property_data)
+            # Use safe extraction method
+            response_text = self._safe_extract_response_text(response, "property_market_analysis")
             
-            # Check if response has text content
-            if hasattr(response, 'text') and response.text:
-                # Log the interaction
-                self._log_interaction("property_market_analysis", property_data, response.text)
-                return response.text
+            if response_text:
+                # Log the successful interaction
+                self._log_interaction("property_market_analysis", property_data, response_text)
+                return response_text
             else:
-                logger.warning("Gemini AI response has no text content, using fallback")
+                logger.warning("Could not extract valid response from Gemini AI, using fallback content")
                 return self._get_fallback_market_analysis(property_data)
             
         except Exception as e:
@@ -198,18 +271,15 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Check if response has valid content
-            if not response or not response.candidates:
-                logger.warning("Gemini AI returned empty response for investment recommendations, using fallback")
-                return self._get_fallback_investment_recommendations(user_profile)
+            # Use safe extraction method
+            response_text = self._safe_extract_response_text(response, "investment_recommendations")
             
-            # Check if response has text content
-            if hasattr(response, 'text') and response.text:
-                # Log the interaction
-                self._log_interaction("investment_recommendations", user_profile, response.text)
-                return response.text
+            if response_text:
+                # Log the successful interaction
+                self._log_interaction("investment_recommendations", user_profile, response_text)
+                return response_text
             else:
-                logger.warning("Gemini AI response has no text content for investment recommendations, using fallback")
+                logger.warning("Could not extract valid response for investment recommendations, using fallback")
                 return self._get_fallback_investment_recommendations(user_profile)
             
         except Exception as e:
@@ -307,18 +377,15 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Check if response has valid content
-            if not response or not response.candidates:
-                logger.warning("Gemini AI returned empty response for market trends, using fallback")
-                return self._get_fallback_market_trends(city, property_type)
+            # Use safe extraction method
+            response_text = self._safe_extract_response_text(response, "market_trends")
             
-            # Check if response has text content
-            if hasattr(response, 'text') and response.text:
-                # Log the interaction
-                self._log_interaction("market_trends", {"city": city, "property_type": property_type}, response.text)
-                return response.text
+            if response_text:
+                # Log the successful interaction
+                self._log_interaction("market_trends", {"city": city, "property_type": property_type}, response_text)
+                return response_text
             else:
-                logger.warning("Gemini AI response has no text content for market trends, using fallback")
+                logger.warning("Could not extract valid response for market trends, using fallback")
                 return self._get_fallback_market_trends(city, property_type)
             
         except Exception as e:
@@ -397,26 +464,23 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Check if response has valid content
-            if not response or not response.candidates:
-                logger.warning("Gemini AI returned empty response for QA, using fallback")
-                return self._get_fallback_qa_response(question, context)
+            # Use safe extraction method
+            response_text = self._safe_extract_response_text(response, "qa_session")
             
-            # Check if response has text content
-            if hasattr(response, 'text') and response.text:
+            if response_text:
                 # Add to conversation history
                 self.conversation_history.append({
                     "timestamp": datetime.now().isoformat(),
                     "question": question,
-                    "answer": response.text,
+                    "answer": response_text,
                     "context": context
                 })
                 
-                # Log the interaction
-                self._log_interaction("qa_session", {"question": question, "context": context}, response.text)
-                return response.text
+                # Log the successful interaction
+                self._log_interaction("qa_session", {"question": question, "context": context}, response_text)
+                return response_text
             else:
-                logger.warning("Gemini AI response has no text content for QA, using fallback")
+                logger.warning("Could not extract valid response for QA, using fallback")
                 return self._get_fallback_qa_response(question, context)
             
         except Exception as e:
@@ -492,18 +556,15 @@ class GeminiAIService:
             
             response = self.model.generate_content(prompt)
             
-            # Check if response has valid content
-            if not response or not response.candidates:
-                logger.warning("Gemini AI returned empty response for property report, using fallback")
-                return self._get_fallback_property_report(property_data)
+            # Use safe extraction method
+            response_text = self._safe_extract_response_text(response, "property_report")
             
-            # Check if response has text content
-            if hasattr(response, 'text') and response.text:
-                # Log the interaction
-                self._log_interaction("property_report", property_data, response.text)
-                return response.text
+            if response_text:
+                # Log the successful interaction
+                self._log_interaction("property_report", property_data, response_text)
+                return response_text
             else:
-                logger.warning("Gemini AI response has no text content for property report, using fallback")
+                logger.warning("Could not extract valid response for property report, using fallback")
                 return self._get_fallback_property_report(property_data)
             
         except Exception as e:
