@@ -339,7 +339,6 @@ MIT Licensed — see [LICENSE](LICENSE).
 
 ## 👤 Author
 **Raghav Kathuria**  
-Springboard Internship 2025  
 GitHub: [MasterJi27](https://github.com/MasterJi27)
 
 ---
