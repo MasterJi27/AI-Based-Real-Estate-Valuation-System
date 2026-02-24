@@ -5,7 +5,9 @@ Centralized configuration for production environment with security and validatio
 import os
 import warnings
 import logging
+import logging.handlers
 from pathlib import Path
+from urllib.parse import quote_plus
 from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 
@@ -17,8 +19,7 @@ class ProductionConfig:
     
     def __init__(self):
         self._load_configuration()
-        # Skip validation in production to avoid deployment issues
-        # self._validate_configuration() 
+        self._validate_configuration()
         self._setup_logging()
     
     def _get_api_key(self):
@@ -28,7 +29,9 @@ class ProductionConfig:
             # Try Streamlit secrets first
             if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
                 return st.secrets['GOOGLE_API_KEY']
-        except:
+        except ImportError:
+            pass
+        except Exception:
             pass
         
         # Try environment variables
@@ -104,6 +107,10 @@ class ProductionConfig:
         
         if self.DATA_CONFIG['min_bhk'] >= self.DATA_CONFIG['max_bhk']:
             self.DATA_CONFIG['max_bhk'] = self.DATA_CONFIG['min_bhk'] + 1
+        
+        # Price range sanity check
+        if self.DATA_CONFIG['min_price'] >= self.DATA_CONFIG['max_price']:
+            self.DATA_CONFIG['max_price'] = self.DATA_CONFIG['min_price'] * 10
         
         # External APIs
         self.EXTERNAL_APIS = {
@@ -183,23 +190,34 @@ class ProductionConfig:
         log_level = getattr(logging, self.LOGGING_CONFIG['level'].upper(), logging.INFO)
         
         # Basic logging configuration
+        log_path = Path(self.LOGGING_CONFIG['file_path'])
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        max_bytes = self.LOGGING_CONFIG['max_file_size_mb'] * 1024 * 1024
+        rotating_handler = logging.handlers.RotatingFileHandler(
+            filename=str(log_path),
+            maxBytes=max_bytes,
+            backupCount=self.LOGGING_CONFIG['backup_count'],
+            encoding='utf-8'
+        )
         logging.basicConfig(
             level=log_level,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
-                logging.FileHandler(self.LOGGING_CONFIG['file_path']),
+                rotating_handler,
                 logging.StreamHandler()
             ]
         )
     
     def get_database_url(self) -> str:
-        """Get complete database URL"""
+        """Get complete database URL with URL-encoded credentials"""
         if self.DATABASE_CONFIG['url']:
             return self.DATABASE_CONFIG['url']
         
-        # Build URL from components
-        return (f"postgresql://{self.DATABASE_CONFIG['user']}:"
-                f"{self.DATABASE_CONFIG['password']}@"
+        # Build URL from components with URL-encoded credentials
+        user = quote_plus(self.DATABASE_CONFIG['user'])
+        password = quote_plus(self.DATABASE_CONFIG['password'])
+        return (f"postgresql://{user}:"
+                f"{password}@"
                 f"{self.DATABASE_CONFIG['host']}:"
                 f"{self.DATABASE_CONFIG['port']}/"
                 f"{self.DATABASE_CONFIG['name']}")

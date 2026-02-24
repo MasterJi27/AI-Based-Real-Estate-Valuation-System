@@ -6,11 +6,14 @@ import hashlib
 import hmac
 import time
 import re
+import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple, Any
 from collections import defaultdict
 import secrets
 import ipaddress
+
+logger = logging.getLogger(__name__)
 
 class SecurityManager:
     """Production security management system"""
@@ -27,7 +30,7 @@ class SecurityManager:
     def _load_suspicious_patterns(self) -> List[re.Pattern]:
         """Load patterns for detecting suspicious input"""
         patterns = [
-            r'<script[^>]*>.*?</script>',  # Script tags
+            r'<script[^>]*>.*?</script>',  # Script tags (DOTALL so . matches newlines)
             r'javascript:',  # JavaScript protocol
             r'on\w+\s*=',  # Event handlers
             r'eval\s*\(',  # eval function
@@ -36,13 +39,13 @@ class SecurityManager:
             r'alert\s*\(',  # Alert function
             r'prompt\s*\(',  # Prompt function
             r'confirm\s*\(',  # Confirm function
-            r'\.\./',  # Directory traversal
+            r'\.\.',  # Directory traversal
             r'union\s+select',  # SQL injection
             r'drop\s+table',  # SQL injection
             r'insert\s+into',  # SQL injection
             r'delete\s+from',  # SQL injection
         ]
-        return [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
+        return [re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in patterns]
     
     def validate_input(self, text: str, max_length: int = 1000) -> Tuple[bool, str]:
         """Validate and sanitize user input"""
@@ -132,8 +135,11 @@ class SecurityManager:
             timestamp_str, signature = token.split(':', 1)
             timestamp = int(timestamp_str)
             
-            # Check if token is not expired
-            if time.time() - timestamp > max_age:
+            # Check if token is not expired or from the future
+            now = time.time()
+            if timestamp > now:  # Future token — reject
+                return False
+            if now - timestamp > max_age:
                 return False
             
             # Regenerate expected signature
@@ -178,8 +184,7 @@ class SecurityManager:
     def block_ip(self, ip_address: str, reason: str = "Security violation"):
         """Block an IP address"""
         self.blocked_ips[ip_address] = datetime.now()
-        # Log the blocking event
-        print(f"IP {ip_address} blocked: {reason}")
+        logger.warning(f"IP {ip_address} blocked: {reason}")
 
 class RateLimiter:
     """Rate limiting for API endpoints and user actions"""
@@ -231,7 +236,7 @@ class RateLimiter:
         self.requests[key] = [req_time for req_time in self.requests[key] 
                              if req_time > cutoff_time]
         
-        return max_requests - len(self.requests[key])
+        return max(0, max_requests - len(self.requests[key]))
     
     def reset_user_limits(self, identifier: str):
         """Reset all limits for a user"""
@@ -265,9 +270,10 @@ class ContentFilter:
         """Filter content for inappropriate material"""
         issues = []
         
-        # Check for blocked words
+        # Check for blocked words using word-boundary matching
         text_lower = text.lower()
-        found_blocked = [word for word in self.blocked_words if word in text_lower]
+        found_blocked = [word for word in self.blocked_words
+                         if re.search(rf'\b{re.escape(word)}\b', text_lower)]
         if found_blocked:
             issues.append(f"Contains blocked words: {', '.join(found_blocked)}")
         
@@ -286,9 +292,11 @@ class ContentFilter:
         
         # Check for excessive capitalization (could be spam)
         if len(text) > 10:
-            caps_ratio = sum(1 for c in text if c.isupper()) / len(text)
-            if caps_ratio > 0.7:
-                issues.append("Excessive use of capital letters")
+            alpha_chars = [c for c in text if c.isalpha()]
+            if alpha_chars:
+                caps_ratio = sum(1 for c in alpha_chars if c.isupper()) / len(alpha_chars)
+                if caps_ratio > 0.7:
+                    issues.append("Excessive use of capital letters")
         
         is_clean = len(issues) == 0
         filtered_text = self._apply_content_filters(text) if not is_clean else text

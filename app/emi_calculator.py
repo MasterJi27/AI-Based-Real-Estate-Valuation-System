@@ -19,11 +19,21 @@ class EMICalculator:
         Monthly EMI amount
         """
         try:
+            # Input validation
+            if not (isinstance(principal, (int, float)) and principal > 0):
+                logger.warning("calculate_emi: invalid principal")
+                return 0
+            if not (isinstance(annual_rate, (int, float)) and annual_rate >= 0):
+                logger.warning("calculate_emi: invalid annual_rate")
+                return 0
+            if not (isinstance(tenure_years, (int, float)) and tenure_years > 0):
+                logger.warning("calculate_emi: invalid tenure_years")
+                return 0
             # Convert annual rate to monthly and percentage to decimal
             monthly_rate = (annual_rate / 100) / 12
             
-            # Convert years to months
-            tenure_months = tenure_years * 12
+            # Convert years to months (must be integer for loop)
+            tenure_months = int(round(tenure_years * 12))
             
             if monthly_rate == 0:
                 # If no interest rate
@@ -34,10 +44,13 @@ class EMICalculator:
                 emi_denominator = math.pow(1 + monthly_rate, tenure_months) - 1
                 emi = emi_numerator / emi_denominator
             
+            if emi <= 0:
+                logger.warning("calculate_emi: computed EMI is non-positive")
+                return 0
             return round(emi, 2)
         
         except Exception as e:
-            logger.info(f"Error calculating EMI: {str(e)}")
+            logger.exception(f"Error calculating EMI: {str(e)}")
             return 0
     
     def calculate_loan_details(self, principal, annual_rate, tenure_years):
@@ -64,7 +77,7 @@ class EMICalculator:
             }
         
         except Exception as e:
-            logger.info(f"Error calculating loan details: {str(e)}")
+            logger.exception(f"Error calculating loan details: {str(e)}")
             return None
     
     def generate_amortization_schedule(self, principal, annual_rate, tenure_years):
@@ -77,7 +90,7 @@ class EMICalculator:
         try:
             emi = self.calculate_emi(principal, annual_rate, tenure_years)
             monthly_rate = (annual_rate / 100) / 12
-            tenure_months = tenure_years * 12
+            tenure_months = int(round(tenure_years * 12))
             
             schedule = []
             remaining_principal = principal
@@ -103,7 +116,7 @@ class EMICalculator:
             return schedule
         
         except Exception as e:
-            logger.info(f"Error generating amortization schedule: {str(e)}")
+            logger.exception(f"Error generating amortization schedule: {str(e)}")
             return []
     
     def calculate_prepayment_benefit(self, principal, annual_rate, tenure_years, prepayment_amount, prepayment_month):
@@ -120,7 +133,7 @@ class EMICalculator:
             # Generate schedule until prepayment month
             original_schedule = self.generate_amortization_schedule(principal, annual_rate, tenure_years)
             
-            if prepayment_month > len(original_schedule):
+            if prepayment_month < 1 or prepayment_month > len(original_schedule):
                 return None
             
             # Outstanding principal at prepayment month
@@ -138,7 +151,7 @@ class EMICalculator:
                 }
             
             # Calculate remaining tenure with same EMI
-            remaining_years = (len(original_schedule) - prepayment_month) / 12
+            remaining_years = max((len(original_schedule) - prepayment_month) / 12, 1/12)
             new_details = self.calculate_loan_details(new_principal, annual_rate, remaining_years)
             
             # Calculate savings
@@ -156,5 +169,5 @@ class EMICalculator:
             }
         
         except Exception as e:
-            logger.info(f"Error calculating prepayment benefit: {str(e)}")
+            logger.exception(f"Error calculating prepayment benefit: {str(e)}")
             return None

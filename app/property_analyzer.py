@@ -37,7 +37,7 @@ class PropertyAnalyzer:
             # Parse purchase date
             purchase_date_obj = datetime.strptime(purchase_date, '%Y-%m-%d')
             current_date = datetime.now()
-            years_held = (current_date - purchase_date_obj).days / 365.25
+            years_held = max(0.0, (current_date - purchase_date_obj).days / 365.25)
             
             # Get city appreciation rate
             city_rates = self.city_appreciation_rates.get(city, {'historical': 8.0})
@@ -127,6 +127,8 @@ class PropertyAnalyzer:
     
     def should_sell_or_hold(self, property_value_data: Dict, current_market_price: float = None) -> Dict:
         """Analyze whether to sell or hold the property"""
+        if not property_value_data:
+            return {}
         try:
             city = property_value_data['city']
             current_value = property_value_data['current_estimated_value']
@@ -259,7 +261,12 @@ class PropertyAnalyzer:
         try:
             city = property_details.get('city', 'Mumbai')
             property_type = property_details.get('property_type', 'Apartment')
-            area_sqft = property_details.get('area_sqft', 1000)
+            
+            # Price per sq ft analysis
+            area_sqft = property_details.get('area_sqft', 0)
+            if not area_sqft or float(area_sqft) <= 0:
+                area_sqft = 1  # Prevent division by zero
+            area_sqft = float(area_sqft)
             
             # Get market data
             city_rates = self.city_appreciation_rates.get(city, {'projected': 7.0})
@@ -447,10 +454,11 @@ class PropertyAnalyzer:
             for years in [1, 2, 3, 5, 10]:
                 future_value = current_value * ((1 + projected_rate/100) ** years)
                 future_return = ((future_value - purchase_price) / purchase_price) * 100
+                total_years = property_value_data.get('years_held', 0) + years
                 projections[f'{years}_year'] = {
                     'value': future_value,
                     'total_return': future_return,
-                    'annual_return': future_return / (property_value_data['years_held'] + years)
+                    'annual_return': future_return / total_years if total_years > 0 else 0
                 }
             
             return {

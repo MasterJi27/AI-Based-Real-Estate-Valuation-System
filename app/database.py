@@ -3,9 +3,9 @@ import psycopg2.extras
 import pandas as pd
 import os
 import logging
-from datetime import datetime
-import json
+from urllib.parse import quote_plus
 from typing import Optional, Dict, List, Any
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -20,10 +20,19 @@ class DatabaseManager:
             'host': os.getenv('PGHOST', 'localhost'),
             'database': os.getenv('PGDATABASE', 'realestate'),
             'user': os.getenv('PGUSER', 'postgres'),
-            'password': os.getenv('PGPASSWORD', 'password'),
+            'password': os.getenv('PGPASSWORD') or '',
             'port': os.getenv('PGPORT', '5432'),
             'sslmode': os.getenv('PGSSLMODE', 'prefer')
         }
+        _user = quote_plus(self.connection_params['user'])
+        _pw = quote_plus(self.connection_params['password'])
+        _host = self.connection_params['host']
+        _port = self.connection_params['port']
+        _db = self.connection_params['database']
+        self._engine = create_engine(
+            f"postgresql+psycopg2://{_user}:{_pw}@{_host}:{_port}/{_db}",
+            connect_args={'sslmode': self.connection_params['sslmode'], 'connect_timeout': 30}
+        )
         self.connection_available = False
         self.init_database()
     
@@ -41,6 +50,7 @@ class DatabaseManager:
     
     def init_database(self):
         """Initialize database tables"""
+        conn = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -88,11 +98,11 @@ class DatabaseManager:
                 );
             """)
             
-            # Create user analytics table
+            # Create user analytics table with UNIQUE session_id
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS user_analytics (
                     id SERIAL PRIMARY KEY,
-                    session_id VARCHAR(100),
+                    session_id VARCHAR(100) UNIQUE,
                     page_views INTEGER DEFAULT 1,
                     predictions_made INTEGER DEFAULT 0,
                     favorite_city VARCHAR(50),
@@ -100,6 +110,17 @@ class DatabaseManager:
                     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
+            """)
+            # Back-fill UNIQUE constraint if the table already existed without it
+            cursor.execute("""
+                DO $$ BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'user_analytics_session_id_key'
+                    ) THEN
+                        ALTER TABLE user_analytics ADD CONSTRAINT user_analytics_session_id_key UNIQUE (session_id);
+                    END IF;
+                END $$;
             """)
             
             # Create market trends table
@@ -142,12 +163,14 @@ class DatabaseManager:
             
             conn.commit()
             cursor.close()
-            conn.close()
             self.connection_available = True
             
         except Exception as e:
             logger.error(f"Error initializing database: {str(e)}")
             self.connection_available = False
+        finally:
+            if conn:
+                conn.close()
     
     def load_properties_to_db(self, df: pd.DataFrame):
         """Load property data from DataFrame to database"""
@@ -204,7 +227,9 @@ class DatabaseManager:
                 session_id, property_data['city'], property_data['district'],
                 property_data['sub_district'], float(property_data['area_sqft']),
                 int(property_data['bhk']), property_data['property_type'],
-                property_data['furnishing'], float(ensemble_prediction), float(ensemble_prediction),
+                property_data['furnishing'],
+                float(predictions.get('predicted_price', ensemble_prediction)),
+                float(ensemble_prediction),
                 float(predictions.get('decision_tree', 0)), float(predictions.get('random_forest', 0)),
                 float(predictions.get('xgboost', 0)), investment_advice
             ))
@@ -252,20 +277,25 @@ class DatabaseManager:
     
     def create_user_analytics(self, session_id: str) -> Dict:
         """Create new user analytics record"""
+        conn = None
         try:
             conn = self.get_connection()
+            if conn is None:
+                return {}
             cursor = conn.cursor()
             
             cursor.execute("""
                 INSERT INTO user_analytics (session_id, page_views, predictions_made)
                 VALUES (%s, 1, 0)
+                ON CONFLICT (session_id) DO UPDATE
+                    SET page_views = user_analytics.page_views + 1,
+                        last_activity = CURRENT_TIMESTAMP
                 RETURNING page_views, predictions_made, favorite_city, avg_property_price, last_activity
             """, (session_id,))
             
             result = cursor.fetchone()
             conn.commit()
             cursor.close()
-            conn.close()
             
             return {
                 'page_views': result[0],
@@ -278,54 +308,50 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error creating user analytics: {str(e)}")
             return {}
+        finally:
+            if conn:
+                conn.close()
     
     def update_user_analytics(self, session_id: str, increment_predictions: bool = False,
                             favorite_city: str = None, avg_price: float = None):
-        """Update user analytics"""
+        """Update user analytics — all changes in a single UPDATE to avoid race conditions"""
+        conn = None
         try:
             conn = self.get_connection()
             if conn is None:
                 return False
             cursor = conn.cursor()
             
+            # Build a single UPDATE with all requested changes
+            set_parts = [
+                "page_views = page_views + 1",
+                "last_activity = CURRENT_TIMESTAMP",
+            ]
+            params: list = []
             if increment_predictions:
-                cursor.execute("""
-                    UPDATE user_analytics 
-                    SET predictions_made = predictions_made + 1, 
-                        page_views = page_views + 1,
-                        last_activity = CURRENT_TIMESTAMP
-                    WHERE session_id = %s
-                """, (session_id,))
-            else:
-                cursor.execute("""
-                    UPDATE user_analytics 
-                    SET page_views = page_views + 1,
-                        last_activity = CURRENT_TIMESTAMP
-                    WHERE session_id = %s
-                """, (session_id,))
+                set_parts.append("predictions_made = predictions_made + 1")
+            if favorite_city is not None:
+                set_parts.append("favorite_city = %s")
+                params.append(favorite_city)
+            if avg_price is not None:
+                set_parts.append("avg_property_price = %s")
+                params.append(float(avg_price))
+            params.append(session_id)
             
-            if favorite_city:
-                cursor.execute("""
-                    UPDATE user_analytics 
-                    SET favorite_city = %s
-                    WHERE session_id = %s
-                """, (favorite_city, session_id))
-            
-            if avg_price:
-                cursor.execute("""
-                    UPDATE user_analytics 
-                    SET avg_property_price = %s
-                    WHERE session_id = %s
-                """, (float(avg_price), session_id))
-            
+            cursor.execute(
+                f"UPDATE user_analytics SET {', '.join(set_parts)} WHERE session_id = %s",
+                params
+            )
             conn.commit()
             cursor.close()
-            conn.close()
             return True
             
         except Exception as e:
             logger.error(f"Error updating user analytics: {str(e)}")
             return False
+        finally:
+            if conn:
+                conn.close()
     
     def get_prediction_history(self, session_id: str, limit: int = 10) -> List[Dict]:
         """Get user's prediction history"""
@@ -444,6 +470,10 @@ class DatabaseManager:
     
     def save_search(self, session_id: str, search_name: str, filters: Dict):
         """Save user search preferences"""
+        if not filters.get('city'):
+            logger.warning("save_search called without a city filter — skipping.")
+            return False
+        conn = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -468,12 +498,14 @@ class DatabaseManager:
             
             conn.commit()
             cursor.close()
-            conn.close()
             return True
             
         except Exception as e:
             logger.error(f"Error saving search: {str(e)}")
             return False
+        finally:
+            if conn:
+                conn.close()
     
     def get_saved_searches(self, session_id: str) -> List[Dict]:
         """Get user's saved searches"""
@@ -586,7 +618,7 @@ class DatabaseManager:
                 LIMIT 100
             """
             
-            df = pd.read_sql_query(query, conn, params=params)
+            df = pd.read_sql_query(query, self._engine, params=params)
             
             cursor.close()
             conn.close()
@@ -613,6 +645,9 @@ class DatabaseManager:
             
             if filters.get('city'):
                 filtered_data = filtered_data[filtered_data['city'] == filters['city']]
+            
+            if filters.get('district'):
+                filtered_data = filtered_data[filtered_data['district'] == filters['district']]
             
             if filters.get('min_area'):
                 filtered_data = filtered_data[filtered_data['area_sqft'] >= filters['min_area']]

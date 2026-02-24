@@ -55,8 +55,8 @@ class RealEstatePricePredictor:
         """Preprocess the data for training or prediction"""
         df = data.copy()
         
-        logger.info(f"Preprocessing input shape: {df.shape}")
-        logger.info(f"Preprocessing columns: {df.columns.tolist()}")
+        logger.debug(f"Preprocessing input shape: {df.shape}")
+        logger.debug(f"Preprocessing columns: {df.columns.tolist()}")
         
         # Encode categorical variables
         categorical_cols = ['city', 'district', 'sub_district', 'property_type', 'furnishing']
@@ -66,7 +66,7 @@ class RealEstatePricePredictor:
                 if col not in self.label_encoders:
                     self.label_encoders[col] = LabelEncoder()
                     df[col] = self.label_encoders[col].fit_transform(df[col].astype(str))
-                    logger.info(f"Created new encoder for {col}")
+                    logger.debug(f"Created new encoder for {col}")
                 else:
                     # Handle unseen categories using vectorized operations
                     unique_values = self.label_encoders[col].classes_
@@ -74,10 +74,10 @@ class RealEstatePricePredictor:
                     # Use np.where instead of apply(lambda) for better performance
                     df[col] = np.where(df[col].isin(unique_values), df[col], unique_values[0])
                     df[col] = self.label_encoders[col].transform(df[col])
-                    logger.info(f"Used existing encoder for {col}")
+                    logger.debug(f"Used existing encoder for {col}")
         
-        logger.info(f"Preprocessing output shape: {df.shape}")
-        logger.info(f"Preprocessing output columns: {df.columns.tolist()}")
+        logger.debug(f"Preprocessing output shape: {df.shape}")
+        logger.debug(f"Preprocessing output columns: {df.columns.tolist()}")
         
         return df
     
@@ -124,10 +124,12 @@ class RealEstatePricePredictor:
             
             # Create ensemble prediction (weighted average based on R2 score)
             weights = {}
-            total_r2 = sum([perf['r2_score'] for perf in model_performances.values()])
+            # Clamp R2 to 0 before summing so negative scores don't invert weights
+            clamped_r2 = {name: max(0.0, perf['r2_score']) for name, perf in model_performances.items()}
+            total_r2 = sum(clamped_r2.values())
             
             for name, perf in model_performances.items():
-                weights[name] = float(perf['r2_score'] / total_r2 if total_r2 > 0 else 1/3)
+                weights[name] = float(clamped_r2[name] / total_r2 if total_r2 > 0 else 1/3)
             
             # Ensemble prediction
             ensemble_pred = np.zeros_like(y_test, dtype=np.float64)
@@ -156,7 +158,7 @@ class RealEstatePricePredictor:
             return True
             
         except Exception as e:
-            logger.info(f"Error training models: {str(e)}")
+            logger.exception(f"Error training models: {str(e)}")
             return False
     
     def predict(self, property_data):
@@ -165,19 +167,19 @@ class RealEstatePricePredictor:
             raise ValueError("Models not trained yet!")
         
         try:
-            logger.info(f"Starting prediction with data: {property_data}")
-            logger.info(f"Input type: {type(property_data)}")
+            # Avoid logging raw property data to protect potential PII
+            logger.debug(f"Starting prediction, input type: {type(property_data)}")
             
             # Handle both DataFrame and dictionary inputs
             if isinstance(property_data, pd.DataFrame):
-                logger.info("Input is DataFrame - converting to dictionary")
+                logger.debug("Input is DataFrame - converting to dictionary")
                 if len(property_data) != 1:
                     logger.error(f"DataFrame should have exactly 1 row, got {len(property_data)}")
                     return 0, "Invalid DataFrame input", {}
                 property_dict = property_data.iloc[0].to_dict()
-                logger.info(f"Converted to dict: {property_dict}")
+                logger.debug("Converted DataFrame to dict")
             elif isinstance(property_data, dict):
-                logger.info("Input is dictionary - using directly")
+                logger.debug("Input is dictionary - using directly")
                 property_dict = property_data.copy()
             else:
                 logger.error(f"Invalid input type: {type(property_data)}")
@@ -185,7 +187,7 @@ class RealEstatePricePredictor:
             
             # Convert to DataFrame with proper structure
             df = pd.DataFrame([property_dict])
-            logger.info(f"Created DataFrame with shape: {df.shape}, columns: {df.columns.tolist()}")
+            logger.debug(f"Created DataFrame with shape: {df.shape}, columns: {df.columns.tolist()}")
             
             # Ensure all required columns are present with default values
             for col in self.feature_columns:
@@ -196,35 +198,34 @@ class RealEstatePricePredictor:
                         df[col] = 2  # default BHK
                     else:
                         df[col] = 'Unknown'
-                    logger.info(f"Added missing column {col} with default value")
+                    logger.debug(f"Added missing column {col} with default value")
             
             # Preprocess the data
-            logger.info("Starting preprocessing...")
+            logger.debug("Starting preprocessing...")
             processed_df = self.preprocess_data(df)
-            logger.info(f"Preprocessing complete. Shape: {processed_df.shape}")
+            logger.debug(f"Preprocessing complete. Shape: {processed_df.shape}")
             
             # Extract features in the correct order and ensure proper shape
-            logger.info(f"Extracting features: {self.feature_columns}")
+            logger.debug(f"Extracting features: {self.feature_columns}")
             X_pred = processed_df[self.feature_columns]
-            logger.info(f"Raw feature extraction shape: {X_pred.shape}")
-            logger.info(f"Raw feature extraction type: {type(X_pred)}")
+            logger.debug(f"Feature extraction shape: {X_pred.shape}")
             
             # Convert to numpy array safely
             try:
                 if hasattr(X_pred, 'values'):
                     X_pred_array = X_pred.values
-                    logger.info(f"Converted to numpy array: {X_pred_array.shape}")
+                    logger.debug(f"Converted to numpy array: {X_pred_array.shape}")
                 else:
                     X_pred_array = np.array(X_pred)
-                    logger.info(f"Created numpy array: {X_pred_array.shape}")
+                    logger.debug(f"Created numpy array: {X_pred_array.shape}")
                 
                 # Ensure proper 2D shape
                 if X_pred_array.ndim == 1:
                     X_pred_array = X_pred_array.reshape(1, -1)
-                    logger.info(f"Reshaped 1D to 2D: {X_pred_array.shape}")
+                    logger.debug(f"Reshaped 1D to 2D: {X_pred_array.shape}")
                 elif X_pred_array.ndim > 2:
                     X_pred_array = X_pred_array.reshape(1, -1)
-                    logger.info(f"Reshaped >2D to 2D: {X_pred_array.shape}")
+                    logger.debug(f"Reshaped >2D to 2D: {X_pred_array.shape}")
                 
                 # Final validation
                 if X_pred_array.shape[0] != 1:
@@ -235,8 +236,7 @@ class RealEstatePricePredictor:
                     logger.error(f"Feature mismatch: got {X_pred_array.shape[1]}, expected {len(self.feature_columns)}")
                     return 0, "Feature dimension mismatch", {}
                 
-                logger.info(f"Final validation passed. Shape: {X_pred_array.shape}")
-                logger.info(f"Input data sample: {X_pred_array[0][:5]}...")  # Show first 5 features
+                logger.debug(f"Final validation passed. Shape: {X_pred_array.shape}")
                 
             except Exception as array_error:
                 logger.error(f"Error converting to array: {array_error}")
@@ -246,12 +246,11 @@ class RealEstatePricePredictor:
             predictions = {}
             for name, model in self.models.items():
                 try:
-                    logger.info(f"Making prediction with {name} model...")
+                    logger.debug(f"Making prediction with {name} model...")
                     pred_result = model.predict(X_pred_array)
-                    logger.info(f"{name} prediction result: {pred_result}")
                     predictions[name] = pred_result[0] if len(pred_result) > 0 else 0
                 except Exception as model_error:
-                    logger.error(f"Error with {name} model prediction: {str(model_error)}")
+                    logger.error(f"Error with {name} model prediction: {str(model_error)}", exc_info=False)
                     predictions[name] = 0
             
             # Check if we have valid predictions
@@ -266,7 +265,7 @@ class RealEstatePricePredictor:
             )
             
             # Generate investment advice
-            investment_advice = self._generate_investment_advice(property_data, ensemble_prediction)
+            investment_advice = self._generate_investment_advice(property_dict, ensemble_prediction)
             
             # Return ensemble prediction and individual model predictions for transparency
             return ensemble_prediction, investment_advice, predictions
@@ -279,7 +278,10 @@ class RealEstatePricePredictor:
         """Generate investment advice based on property characteristics"""
         try:
             # Price per sqft analysis
-            price_per_sqft = predicted_price / property_data['area_sqft']
+            area_sqft = property_data.get('area_sqft') if isinstance(property_data, dict) else getattr(property_data, 'area_sqft', None)
+            if not area_sqft or float(area_sqft) <= 0:
+                return "Unable to Determine"
+            price_per_sqft = predicted_price / float(area_sqft)
             
             # City-based thresholds (approximate market rates)
             city_thresholds = {
@@ -290,7 +292,7 @@ class RealEstatePricePredictor:
                 'Bangalore': 7000
             }
             
-            city = property_data['city']
+            city = property_data.get('city') if isinstance(property_data, dict) else getattr(property_data, 'city', None)
             threshold = city_thresholds.get(city, 8000)
             
             # Investment factors
@@ -302,21 +304,25 @@ class RealEstatePricePredictor:
                 good_factors += 1
             
             # Factor 2: Property size
-            area = property_data['area_sqft']
+            area = property_data.get('area_sqft') if isinstance(property_data, dict) else getattr(property_data, 'area_sqft', 0)
+            area = float(area) if area else 0
             if 800 <= area <= 2000:  # Optimal size range
                 good_factors += 1
             
             # Factor 3: BHK configuration
-            bhk = property_data['bhk']
+            bhk = property_data.get('bhk') if isinstance(property_data, dict) else getattr(property_data, 'bhk', None)
+            bhk = int(bhk) if bhk else 0
             if 2 <= bhk <= 3:  # Most marketable
                 good_factors += 1
             
             # Factor 4: Property type
-            if property_data['property_type'] in ['Apartment', 'Villa']:
+            prop_type = property_data.get('property_type') if isinstance(property_data, dict) else getattr(property_data, 'property_type', '')
+            if prop_type in ['Apartment', 'Villa']:
                 good_factors += 1
             
             # Factor 5: Furnishing
-            if property_data['furnishing'] in ['Semi-Furnished', 'Fully Furnished']:
+            furnishing = property_data.get('furnishing') if isinstance(property_data, dict) else getattr(property_data, 'furnishing', '')
+            if furnishing in ['Semi-Furnished', 'Fully Furnished']:
                 good_factors += 1
             
             # Make recommendation
@@ -356,7 +362,7 @@ class RealEstatePricePredictor:
             
             return feature_importance
         except Exception as e:
-            logger.info(f"Error getting feature importance: {str(e)}")
+            logger.exception(f"Error getting feature importance: {str(e)}")
             return None
     
     def get_price_trend_analysis(self, city, property_type=None):
@@ -389,7 +395,7 @@ class RealEstatePricePredictor:
             
             return stats
         except Exception as e:
-            logger.info(f"Error in price trend analysis: {str(e)}")
+            logger.exception(f"Error in price trend analysis: {str(e)}")
             return None
     
     def calculate_property_appreciation(self, initial_price, years, appreciation_rate=8.0):
@@ -418,7 +424,7 @@ class RealEstatePricePredictor:
                 'appreciation_rate': appreciation_rate
             }
         except Exception as e:
-            logger.info(f"Error calculating appreciation: {str(e)}")
+            logger.exception(f"Error calculating appreciation: {str(e)}")
             return None
     
     def calculate_roi_analysis(self, property_price, monthly_rent, investment_years=10, 
@@ -466,7 +472,7 @@ class RealEstatePricePredictor:
                 'net_rental_yield': (annual_net_income / property_price) * 100
             }
         except Exception as e:
-            logger.info(f"Error calculating ROI: {str(e)}")
+            logger.exception(f"Error calculating ROI: {str(e)}")
             return None
     
     def predict_market_trends(self, city, years_ahead=5):
@@ -514,5 +520,5 @@ class RealEstatePricePredictor:
                 'growth_rate_used': growth_rate
             }
         except Exception as e:
-            logger.info(f"Error predicting market trends: {str(e)}")
+            logger.exception(f"Error predicting market trends: {str(e)}")
             return None

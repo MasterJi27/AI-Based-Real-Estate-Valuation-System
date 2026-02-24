@@ -1,4 +1,4 @@
-﻿# Environment
+# Environment
 .env
 
 # Python
@@ -6,9 +6,3 @@ __pycache__/
 *.py[cod]
 *.pyo
 logs/
-
-# Build artifacts
-../build/
-../dist/
-../*.spec
-../launcher.py

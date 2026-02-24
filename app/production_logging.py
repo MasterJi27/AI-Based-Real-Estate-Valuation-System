@@ -61,9 +61,11 @@ class ProductionLogger:
             console_handler.setFormatter(formatter)
             self.logger.addHandler(console_handler)
         
+        # Pre-compute max_bytes for any file handlers
+        max_bytes = self.config['max_file_size_mb'] * 1024 * 1024
+        
         # File handler with rotation
         if self.config['enable_file']:
-            max_bytes = self.config['max_file_size_mb'] * 1024 * 1024
             file_handler = logging.handlers.RotatingFileHandler(
                 filename=self.config['file_path'],
                 maxBytes=max_bytes,
@@ -77,7 +79,7 @@ class ProductionLogger:
         # JSON handler for structured logs (optional)
         if self.config['enable_json_logs']:
             json_formatter = JsonFormatter()
-            json_file_path = str(log_path).replace('.log', '.json')
+            json_file_path = str(log_path.with_suffix('.json'))
             json_handler = logging.handlers.RotatingFileHandler(
                 filename=json_file_path,
                 maxBytes=max_bytes,
@@ -100,11 +102,11 @@ class ProductionLogger:
         """Log warning message with optional extra data"""
         self.logger.warning(message, extra=extra or {})
     
-    def error(self, message: str, extra: Optional[Dict] = None, exc_info: bool = True):
+    def error(self, message: str, extra: Optional[Dict] = None, exc_info: bool = False):
         """Log error message with optional extra data and exception info"""
         self.logger.error(message, extra=extra or {}, exc_info=exc_info)
     
-    def critical(self, message: str, extra: Optional[Dict] = None, exc_info: bool = True):
+    def critical(self, message: str, extra: Optional[Dict] = None, exc_info: bool = False):
         """Log critical message with optional extra data and exception info"""
         self.logger.critical(message, extra=extra or {}, exc_info=exc_info)
     
@@ -130,18 +132,24 @@ class ProductionLogger:
         self.info(f"User Action: {action}", extra={'user_action': action_data})
     
     def log_security_event(self, event_type: str, severity: str = 'INFO', **kwargs):
-        """Log security-related events"""
+        """Log security-related events at the appropriate level"""
         security_data = {
             'event_type': event_type,
             'severity': severity,
             'timestamp': datetime.now().isoformat(),
             **kwargs
         }
-        
-        if severity.upper() in ['WARNING', 'ERROR', 'CRITICAL']:
-            self.warning(f"Security Event: {event_type}", extra={'security': security_data})
+        severity_upper = severity.upper()
+        extra = {'security': security_data}
+        msg = f"Security Event: {event_type}"
+        if severity_upper == 'CRITICAL':
+            self.critical(msg, extra=extra)
+        elif severity_upper == 'ERROR':
+            self.error(msg, extra=extra)
+        elif severity_upper == 'WARNING':
+            self.warning(msg, extra=extra)
         else:
-            self.info(f"Security Event: {event_type}", extra={'security': security_data})
+            self.info(msg, extra=extra)
 
 class JsonFormatter(logging.Formatter):
     """Custom JSON formatter for structured logging"""

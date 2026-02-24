@@ -84,19 +84,23 @@ def t_cs():
     from content_system import PropertyBuyingGuide, LegalDocumentation, MarketReports, InvestmentTips
     pbg = PropertyBuyingGuide()
     ld = LegalDocumentation()
-    return "4 classes imported"
+    mr = MarketReports()
+    it = InvestmentTips()
+    return "4 classes imported and instantiated"
 test("content_system", t_cs)
 
 print("\n--- Testing Production Config ---")
 def t_cfg():
     from production_config import ProductionConfig
-    return "imported"
+    cfg = ProductionConfig()
+    return "instantiated"
 test("production_config", t_cfg)
 
 print("\n--- Testing Production Security ---")
 def t_sec():
     from production_security import SecurityManager
-    return "imported"
+    sm = SecurityManager()
+    return "instantiated"
 test("production_security", t_sec)
 
 print("\n--- Testing Production Logging ---")
@@ -117,3 +121,7 @@ if failed:
     for k, v in failed:
         print(f"    - {k}: {v}")
 print(f"{'='*45}\n")
+
+if __name__ == '__main__':
+    if failed:
+        sys.exit(1)

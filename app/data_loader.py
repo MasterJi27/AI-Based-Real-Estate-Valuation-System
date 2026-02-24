@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import logging
 import os
+from urllib.parse import quote_plus
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
@@ -17,8 +18,13 @@ class DataLoader:
         host = os.getenv('PGHOST')
         port = os.getenv('PGPORT', '5432')
         database = os.getenv('PGDATABASE')
+        missing = [v for v, val in [('PGUSER', user), ('PGPASSWORD', password),
+                                    ('PGHOST', host), ('PGDATABASE', database)] if not val]
+        if missing:
+            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+        # URL-encode credentials to handle special characters
         self._engine = create_engine(
-            f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}",
+            f"postgresql+psycopg2://{quote_plus(user)}:{quote_plus(password)}@{host}:{port}/{database}",
             connect_args={'sslmode': 'require', 'connect_timeout': 30}
         )
 
@@ -49,28 +55,30 @@ class DataLoader:
             return pd.DataFrame()
 
     def _clean_data(self, df):
-        logger.info(f"Raw rows before cleaning: {len(df)}")
+        logger.debug(f"Raw rows before cleaning: {len(df)}")
         # Remove rows with missing critical values
+        df = df.dropna(subset=['price', 'area_sqft', 'bhk'])
+        # Coerce to numeric before applying range filters
+        for col in ['price', 'area_sqft', 'bhk']:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
         df = df.dropna(subset=['price', 'area_sqft', 'bhk'])
         # Remove outliers (basic filtering)
         df = df[df['price'] > 0]
         df = df[df['area_sqft'] > 0]
         df = df[df['bhk'] > 0]
-        # Ensure consistent data types for ML models
+        # Cast to float64 for ML models
         for col in ['price', 'area_sqft', 'bhk']:
-            df[col] = pd.to_numeric(df[col], errors='coerce').astype(np.float64)
-        # Remove any rows that couldn't be converted
-        df = df.dropna(subset=['price', 'area_sqft', 'bhk'])
-        logger.info(f"Rows after cleaning: {len(df)}")
+            df[col] = df[col].astype(np.float64)
+        logger.debug(f"Rows after cleaning: {len(df)}")
         return df
 
     def get_data_summary(self):
         combined_data = self.load_all_data()
         if combined_data.empty:
-            logger.info("No valid data found for summary.")
+            logger.debug("No valid data found for summary.")
             return None
         summary = combined_data.describe(include='all')
-        logger.info(summary)
+        logger.debug(str(summary))
         return summary
 
     def get_districts_by_city(self, city, combined_data=None):
@@ -80,7 +88,7 @@ class DataLoader:
             city_data = self.load_city_data(city)
         if city_data.empty:
             return []
-        return sorted(city_data['district'].unique())
+        return sorted(city_data['district'].dropna().unique())
 
     def get_subdistricts_by_district(self, city, district, combined_data=None):
         if combined_data is not None:
@@ -90,4 +98,4 @@ class DataLoader:
         if city_data.empty:
             return []
         sub_df = city_data[city_data['district'] == district]
-        return sorted(sub_df['sub_district'].unique())
+        return sorted(sub_df['sub_district'].dropna().unique())

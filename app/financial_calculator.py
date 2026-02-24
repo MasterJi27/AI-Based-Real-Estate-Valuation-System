@@ -92,10 +92,10 @@ class LoanEligibilityCalculator:
             monthly_income, applicant_age, employment_type, credit_score, criteria
         )
         
-        # Adjust eligible amount based on factors
+        # Adjust eligible amount based on ALL eligibility factors
         for factor, multiplier in eligibility_factors.items():
-            if multiplier < 1.0:
-                eligible_amount *= multiplier
+            eligible_amount *= multiplier
+        eligible_amount = max(0, eligible_amount)
         
         # Calculate EMI for eligible amount
         actual_emi = self.calculate_emi(eligible_amount, criteria['interest_rate'], tenure_years)
@@ -293,8 +293,11 @@ class RegistrationCostCalculator:
         
         rates = self.stamp_duty_rates.get(state, self.stamp_duty_rates['Maharashtra'])
         
+        # Guard against unknown buyer_gender values
+        stamp_duty_rate = rates.get(buyer_gender, rates.get('male', 0.07))
+        
         # Calculate stamp duty
-        stamp_duty = property_value * rates[buyer_gender]
+        stamp_duty = property_value * stamp_duty_rate
         
         # Registration fee
         registration_fee = property_value * rates['registration']
@@ -840,13 +843,15 @@ def render_registration_calculator():
         breakdown_df = pd.DataFrame(list(result['cost_breakdown'].items()), columns=['Cost Component', 'Amount (₹)'])
         breakdown_df['Amount (₹)'] = breakdown_df['Amount (₹)'].apply(lambda x: f"{x:,.0f}")
         
-        # Create pie chart
-        fig = px.pie(
-            values=list(result['cost_breakdown'].values()),
-            names=list(result['cost_breakdown'].keys()),
-            title="Registration Cost Breakdown"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        # Create pie chart — filter out non-positive values to avoid plotly errors
+        cost_values = {k: v for k, v in result['cost_breakdown'].items() if v and v > 0}
+        if cost_values:
+            fig = px.pie(
+                values=list(cost_values.values()),
+                names=list(cost_values.keys()),
+                title="Registration Cost Breakdown"
+            )
+            st.plotly_chart(fig, use_container_width=True)
         
         st.table(breakdown_df)
 
@@ -1035,4 +1040,6 @@ def render_appreciation_tracker():
 
 
 if __name__ == "__main__":
-    render_financial_tools()
+    # Financial calculators can be tested independently but render_financial_tools
+    # requires a running Streamlit session; skip when executed as a plain script.
+    print("Financial calculator module loaded successfully.")

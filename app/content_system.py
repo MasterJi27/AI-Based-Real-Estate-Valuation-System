@@ -195,23 +195,30 @@ class PropertyBuyingGuide:
         titles = [self.buying_process_steps[step]["title"] for step in steps]
         durations = [self.buying_process_steps[step]["duration"] for step in steps]
         
+        # Extract the first number from each duration string for a numeric axis
+        import re as _re
+        numeric_durations = []
+        for d in durations:
+            m = _re.search(r'\d+', d)
+            numeric_durations.append(int(m.group()) if m else 1)
+        
         fig = go.Figure()
         
         # Add timeline bars
-        for i, (step, title, duration) in enumerate(zip(steps, titles, durations)):
+        for i, (step, title, duration, num_dur) in enumerate(zip(steps, titles, durations, numeric_durations)):
             fig.add_trace(go.Bar(
-                x=[duration],
+                x=[num_dur],
                 y=[f"Step {step}"],
                 name=title,
                 orientation='h',
-                text=title,
+                text=f"{title} ({duration})",
                 textposition='inside',
                 showlegend=False
             ))
         
         fig.update_layout(
             title="Property Buying Process Timeline",
-            xaxis_title="Duration",
+            xaxis_title="Duration (weeks)",
             yaxis_title="Steps",
             height=500
         )
@@ -514,14 +521,18 @@ class MarketReports:
         """Generate market forecast"""
         current_growth = data.get("price_change", 0)
         
+        quarterly_forecast = current_growth * 0.8
+        # Annualise by compounding four quarters, not a naive multiplier
+        annual_forecast = ((1 + quarterly_forecast / 100) ** 4 - 1) * 100
+        
         forecast = {
             "next_quarter": {
-                "price_change_forecast": current_growth * 0.8,
+                "price_change_forecast": quarterly_forecast,
                 "confidence": "Medium",
                 "key_factors": ["Interest rate trends", "Policy changes", "Supply pipeline"]
             },
             "annual_outlook": {
-                "price_appreciation": current_growth * 3.5,
+                "price_appreciation": annual_forecast,
                 "market_sentiment": "Positive" if current_growth > 6 else "Stable",
                 "investment_rating": "Buy" if current_growth > 7 else "Hold"
             }
@@ -974,6 +985,15 @@ class RealEstateNews:
         positive_news = len([article for article in self.news_articles if article["impact"] == "Positive"])
         total_news = len(self.news_articles)
         
+        if total_news == 0:
+            return {
+                "sentiment": "Unknown",
+                "score": 0,
+                "positive_news": 0,
+                "total_news": 0,
+                "confidence": "Low"
+            }
+        
         sentiment_score = (positive_news / total_news) * 100
         
         if sentiment_score >= 70:
@@ -1122,8 +1142,8 @@ def render_legal_documentation():
     for i, (key, checklist) in enumerate(legal_docs.legal_checklists.items()):
         with checklist_cols[i % 2]:
             with st.expander(checklist['title']):
-                for item in checklist['items']:
-                    st.checkbox(item, key=f"{key}_{item[:20]}")
+                for idx, item in enumerate(checklist['items']):
+                    st.checkbox(item, key=f"{key}_{idx}")
 
 
 def render_market_reports():

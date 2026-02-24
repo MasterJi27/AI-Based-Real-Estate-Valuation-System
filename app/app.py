@@ -30,6 +30,10 @@ def safe_execute(func, error_handler=None, fallback_value=None, context=""):
         return func()
     except Exception as e:
         logger.error(f"Error in {context}: {str(e)}")
+        if error_handler is not None:
+            result = error_handler(e)
+            if result is not None:
+                return result
         return fallback_value
 
 def log_user_interaction(action, data=None):
@@ -103,9 +107,6 @@ from gemini_ai import GeminiAIService, initialize_gemini_service, get_gemini_ser
 import uuid
 import warnings
 warnings.filterwarnings('ignore')
-
-# Initialize error handler
-error_handler = SimpleErrorHandler()
 
 # Configure page
 st.set_page_config(
@@ -201,7 +202,7 @@ def initialize_gemini_ai():
                     st.warning("⚠️ Gemini API key not configured")
         except Exception as e:
             st.error(f"❌ Failed to initialize Gemini AI: {str(e)}")
-            error_handler.handle_error(e, "Gemini AI initialization failed")
+            error_handler.handle_data_error(e, "Gemini AI initialization failed")
 
 def main():
     # Security check - rate limiting
@@ -509,9 +510,16 @@ def price_prediction_interface():
         history = st.session_state.db_manager.get_prediction_history(st.session_state.session_id, limit=5)
         if history:
             for i, pred in enumerate(history):
-                st.write(f"**{i+1}.** {pred['city']} - {pred['bhk']} BHK")
-                st.write(f"₹{pred['predicted_price']:,.0f} | {pred['investment_advice']}")
-                st.write(f"_{pred['created_at'].strftime('%m/%d %H:%M')}_")
+                city = pred.get('city', 'Unknown')
+                bhk = pred.get('bhk', '—')
+                st.write(f"**{i+1}.** {city} - {bhk} BHK")
+                pred_price = pred.get('predicted_price')
+                price_str = f"₹{pred_price:,.0f}" if isinstance(pred_price, (int, float)) else str(pred_price or 'N/A')
+                investment_advice = pred.get('investment_advice', '—')
+                st.write(f"{price_str} | {investment_advice}")
+                created_at = pred.get('created_at')
+                date_str = created_at.strftime('%m/%d %H:%M') if isinstance(created_at, datetime) else str(created_at or '—')
+                st.write(f"_{date_str}_")
                 st.write("---")
         else:
             st.write("No recent searches found.")
@@ -521,16 +529,21 @@ def price_prediction_interface():
     selected_city = st.sidebar.selectbox("Select City", cities)
     
     # Get districts and sub-districts based on selected city
-    city_data = st.session_state.combined_data[
-        st.session_state.combined_data['city'] == selected_city
-    ]
-    
-    districts = sorted(city_data['district'].unique())
-    selected_district = st.sidebar.selectbox("Select District", districts)
-    
-    district_data = city_data[city_data['district'] == selected_district]
-    sub_districts = sorted(district_data['sub_district'].unique())
-    selected_sub_district = st.sidebar.selectbox("Select Sub-District", sub_districts)
+    combined_data = st.session_state.get('combined_data')
+    if combined_data is not None and not combined_data.empty and st.session_state.data_loaded:
+        city_data = combined_data[combined_data['city'] == selected_city]
+        districts = sorted(city_data['district'].dropna().unique()) if not city_data.empty else []
+    else:
+        city_data = pd.DataFrame()
+        districts = []
+    selected_district = st.sidebar.selectbox("Select District", districts) if districts else st.sidebar.selectbox("Select District", ["—"])
+
+    if not city_data.empty and selected_district != "—":
+        district_data = city_data[city_data['district'] == selected_district]
+        sub_districts = sorted(district_data['sub_district'].dropna().unique()) if not district_data.empty else []
+    else:
+        sub_districts = []
+    selected_sub_district = st.sidebar.selectbox("Select Sub-District", sub_districts) if sub_districts else st.sidebar.selectbox("Select Sub-District", ["—"])
     
     # Property details with validation
     st.sidebar.subheader("Property Specifications")
@@ -670,7 +683,8 @@ def price_prediction_interface():
                 )
             
             with price_col2:
-                price_per_sqft = results['price'] / sq_ft
+                area = results.get('area_sqft') or sq_ft
+                price_per_sqft = results['price'] / area if area > 0 else 0
                 st.metric(
                     "Price per Sq Ft",
                     f"₹{price_per_sqft:,.0f}",
@@ -739,9 +753,10 @@ def price_prediction_interface():
             
             # ROI Analysis for Rental Investment
             st.write("**Rental Investment ROI Analysis**")
+            safe_rent_default = max(5000, min(500000, int(results['price'] * 0.001)))
             monthly_rent = st.number_input("Expected Monthly Rent (₹)", 
                                          min_value=5000, max_value=500000, 
-                                         value=int(results['price'] * 0.001), step=1000)
+                                         value=safe_rent_default, step=1000)
             
             roi_data = st.session_state.predictor.calculate_roi_analysis(
                 results['price'], monthly_rent, investment_years=10
@@ -1146,7 +1161,7 @@ def price_prediction_interface():
     st.subheader("🔍 Advanced Property Search (Database)")
     
     # Database status info
-    db_status = "🟢 Using CSV Data" if not st.session_state.db_manager.connection_available else "🟢 Database Connected"
+    db_status = "🟢 Database Connected" if st.session_state.db_manager.connection_available else "🟡 Using CSV Data"
     st.info(f"Data Source: {db_status} | Search from 500+ properties across 5 major cities")
     
     search_col1, search_col2, search_col3 = st.columns(3)
@@ -1253,7 +1268,7 @@ def property_valuation_interface():
             "Purchase Date",
             value=pd.to_datetime("2020-01-01"),
             min_value=pd.to_datetime("2000-01-01"),
-            max_value=pd.to_datetime("2024-12-31")
+            max_value=pd.Timestamp.now().normalize()
         )
         
         # Property characteristics
@@ -1326,7 +1341,8 @@ def property_valuation_interface():
         # Display user's property history from database
         st.subheader("📋 Your Property Portfolio")
         user_analytics = st.session_state.db_manager.get_user_analytics(st.session_state.session_id)
-        
+        user_analytics = user_analytics or {}
+
         if user_analytics.get('predictions_made', 0) > 0:
             st.metric("Properties Analyzed", user_analytics['predictions_made'])
             st.metric("Avg Property Value", f"₹{user_analytics.get('avg_property_price', 0):,.0f}")
@@ -1579,7 +1595,7 @@ def investment_analysis_interface():
         
         # Financial projections
         st.subheader("💰 Financial Projections")
-        projections = analysis['financial_projections']
+        projections = analysis.get('financial_projections', {})
         
         proj_metrics_col1, proj_metrics_col2, proj_metrics_col3, proj_metrics_col4 = st.columns(4)
         

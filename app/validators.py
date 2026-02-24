@@ -2,6 +2,8 @@
 Input Validation and Sanitization Module
 """
 import re
+import html
+import unicodedata
 import pandas as pd
 from typing import Dict, Any, List, Tuple, Optional
 from production_config import config
@@ -70,6 +72,9 @@ class InputValidator:
         if not text:
             return ""
         
+        # Unescape HTML entities first to prevent double-encoded XSS
+        text = html.unescape(text)
+        
         # Remove HTML tags and special characters
         text = re.sub(r'<[^>]*>', '', text)
         text = re.sub(r'[<>"\']', '', text)
@@ -90,6 +95,9 @@ class InputValidator:
         if len(message) > 500:
             return False, "Message too long. Maximum 500 characters allowed"
         
+        # Normalize Unicode before pattern matching to catch homoglyph attacks
+        normalized = unicodedata.normalize('NFKC', message)
+        
         # Check for potential malicious content (Fixed: Avoid polynomial regex)
         suspicious_patterns = [
             r'<script[^>]*>[^<]*</script>',  # Fixed: More specific pattern
@@ -101,7 +109,7 @@ class InputValidator:
         ]
         
         for pattern in suspicious_patterns:
-            if re.search(pattern, message, re.IGNORECASE):
+            if re.search(pattern, normalized, re.IGNORECASE):
                 return False, "Message contains potentially unsafe content"
         
         return True, "Valid message"
@@ -111,8 +119,10 @@ class DataValidator:
     
     @staticmethod
     def validate_dataframe(df: pd.DataFrame) -> Tuple[bool, List[str]]:
-        """Validate property dataframe"""
+        """Validate property dataframe without mutating the input"""
         errors = []
+        # Work on a copy so the caller's DataFrame is not mutated
+        df = df.copy()
         
         # Check required columns
         required_columns = ['city', 'district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price']

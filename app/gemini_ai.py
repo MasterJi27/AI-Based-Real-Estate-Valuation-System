@@ -47,6 +47,7 @@ class GeminiAIService:
                 ],
                 temperature=0.3,
                 max_tokens=1024,
+                timeout=30,
             )
             text = response.choices[0].message.content
             if text and text.strip():
@@ -54,7 +55,7 @@ class GeminiAIService:
                 return text.strip()
             return None
         except Exception as e:
-            logger.error(f"{operation}: API error: {str(e)}")
+            logger.error(f"{operation}: API error: {str(e)}", exc_info=False)
             return None
 
     def analyze_property_market(self, property_data: Dict[str, Any]) -> str:
@@ -99,11 +100,18 @@ Provide: 1) Market conditions 2) Price trends 3) Supply/demand 4) Infrastructure
         return f"""**Market Trends - {city}**\n\n- Steady growth patterns with 6-10% YoY appreciation\n- Strong demand from IT professionals and families\n- Infrastructure development supporting long-term growth\n- Good rental yield potential in established areas"""
 
     def real_estate_qa(self, question: str, context: Dict[str, Any] = None) -> str:
-        ctx = f"\nContext: {json.dumps(context)}" if context else ""
+        try:
+            ctx_str = json.dumps(context, default=str) if context else ""
+        except (TypeError, ValueError):
+            ctx_str = str(context) if context else ""
+        ctx = f"\nContext: {ctx_str}" if ctx_str else ""
         prompt = f"""As a real estate expert in India, answer:\n\nQ: {question}{ctx}\n\nProvide a direct, comprehensive answer with practical advice and current market considerations."""
         result = self._call_ai(prompt, "qa")
         if result:
-            self.conversation_history.append({"timestamp": datetime.now().isoformat(), "question": question, "answer": result})
+            history = list(self.conversation_history)  # copy before appending
+            history.append({"timestamp": datetime.now().isoformat(), "question": question, "answer": result})
+            # Bound history to last 50 entries
+            self.conversation_history = history[-50:]
             self._log_interaction("qa", {"question": question}, result)
             return result
         return f"""**Answer to:** {question}\n\nFor property buying: verify legal documents, check developer track record, assess location connectivity.\nFor investment: diversify portfolio, focus on infrastructure growth areas, hold 5+ years.\n\n*Consult certified real estate professionals for specific advice.*"""
@@ -124,14 +132,16 @@ Provide: 1) Market conditions 2) Price trends 3) Supply/demand 4) Infrastructure
         self.conversation_history = []
 
     def _log_interaction(self, itype: str, inp: Any, out: str):
+        # Log only the type and output length; never log raw input PII
         logger.info(f"AI interaction: {itype}, output={len(out)} chars")
 
 
-@st.cache_data(ttl=3600)
 def get_cached_market_analysis(city: str, property_type: str = None) -> str:
-    if "gemini_service" not in st.session_state:
+    """Get cached market analysis — caller must supply the service instance."""
+    service = get_gemini_service()
+    if service is None:
         return "AI service not initialized"
-    return st.session_state.gemini_service.analyze_market_trends(city, property_type)
+    return service.analyze_market_trends(city, property_type)
 
 def initialize_gemini_service(api_key: str = None) -> GeminiAIService:
     try:

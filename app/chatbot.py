@@ -34,11 +34,10 @@ def extract_safe_budget(text):
     return None
 
 def extract_safe_city(text):
-    """Extract city information from text"""
+    """Extract city information from text using whole-word matching"""
     cities = ['mumbai', 'delhi', 'bangalore', 'gurugram', 'noida', 'pune', 'chennai']
-    text_lower = text.lower()
     for city in cities:
-        if city in text_lower:
+        if re.search(rf'\b{re.escape(city)}\b', text, re.IGNORECASE):
             return city.title()
     return None
 
@@ -115,18 +114,33 @@ class RealEstateChatbot:
         }
 
     def classify_intent(self, user_input: str) -> str:
-        """Classify user intent based on input patterns using secure regex"""
+        """Classify user intent based on input patterns with priority ordering"""
         user_input = user_input.lower().strip()
         
         # Limit input length for security
         if len(user_input) > 500:
             user_input = user_input[:500]
         
-        for intent, patterns in self.intent_patterns.items():
+        # Specific intents are checked before generic ones to prevent shadowing
+        priority_order = [
+            'price_query', 'emi', 'recommend', 'budget', 'investment_advice',
+            'market_trends', 'location', 'bhk', 'property_type', 'features',
+            'greeting', 'goodbye'
+        ]
+        
+        for intent in priority_order:
+            patterns = self.intent_patterns.get(intent, [])
             for pattern in patterns:
-                # Use regular regex search
                 if re.search(pattern, user_input, re.IGNORECASE):
                     return intent
+        
+        for intent, patterns in self.intent_patterns.items():
+            if intent in priority_order:
+                continue
+            for pattern in patterns:
+                if re.search(pattern, user_input, re.IGNORECASE):
+                    return intent
+        
         return 'default'
 
     def extract_basic_info(self, user_input: str) -> Dict:
@@ -162,7 +176,8 @@ class RealEstateChatbot:
                 city_data = self.combined_data[self.combined_data['city'].str.lower() == city.lower()]
                 if not city_data.empty:
                     avg_price = city_data['price'].mean()
-                    avg_price_per_sqft = (city_data['price'] / city_data['area_sqft']).mean()
+                    valid_area = city_data['area_sqft'].replace(0, float('nan'))
+                    avg_price_per_sqft = (city_data['price'] / valid_area).mean(skipna=True)
                     total_properties = len(city_data)
                     
                     return f"""📊 **{city.title()} Market Insights:**
@@ -174,21 +189,27 @@ class RealEstateChatbot:
                     return f"Sorry, I don't have market data for {city.title()} at the moment."
             else:
                 # Overall market insights
-                cities = self.combined_data['city'].unique()
+                all_cities = self.combined_data['city'].unique()
                 insights = "🏠 **Overall Market Overview:**\n"
-                for city in cities:
-                    city_data = self.combined_data[self.combined_data['city'] == city]
+                for city_name in all_cities:
+                    city_data = self.combined_data[self.combined_data['city'].str.lower() == city_name.lower()]
                     avg_price = city_data['price'].mean()
-                    insights += f"- {city}: ₹{avg_price:,.0f} (avg)\n"
+                    insights += f"- {city_name}: ₹{avg_price:,.0f} (avg)\n"
                 return insights
         except Exception as e:
             return "I'm having trouble accessing market data right now. Please try again later."
 
     def calculate_quick_emi(self, principal: float, rate: float, tenure: int) -> str:
         """Calculate EMI quickly"""
+        if not (isinstance(principal, (int, float)) and principal > 0):
+            return "Please provide positive numbers for principal and tenure."
+        if not (isinstance(tenure, (int, float)) and tenure > 0):
+            return "Please provide positive numbers for principal and tenure."
+        if not (isinstance(rate, (int, float)) and rate >= 0):
+            return "Please provide a non-negative interest rate."
         try:
             monthly_rate = rate / (12 * 100)
-            months = tenure * 12
+            months = int(round(tenure * 12))
             
             if monthly_rate == 0:
                 emi = principal / months
@@ -241,11 +262,20 @@ class RealEstateChatbot:
             return insights
         
         elif intent == 'emi':
-            # Try to extract numbers for EMI calculation
+            # Try to extract budget using the helper first (handles lakh/crore units)
+            budget = extract_safe_budget(user_input)
             numbers = re.findall(r'\d+(?:\.\d+)?', user_input)
+            if budget is not None and len(numbers) >= 2:
+                try:
+                    # Find rate and tenure from remaining numbers
+                    remaining = [float(n) for n in numbers]
+                    if len(remaining) >= 2:
+                        return self.calculate_quick_emi(budget, remaining[-2], remaining[-1])
+                except (ValueError, IndexError, TypeError):
+                    pass
             if len(numbers) >= 3:
                 try:
-                    principal = float(numbers[0]) * (1000000 if float(numbers[0]) < 100 else 1)  # Assume millions if small number
+                    principal = float(numbers[0]) * (100000 if float(numbers[0]) < 1000 else 1)  # Assume lakhs if small number
                     rate = float(numbers[1])
                     tenure = float(numbers[2])
                     return self.calculate_quick_emi(principal, rate, tenure)
@@ -319,7 +349,11 @@ class RealEstateChatbot:
                 recommendations += f"• 🏠 Type: {prop['bhk']} BHK {prop['property_type']}\n"
                 recommendations += f"• 📐 Area: {prop['area_sqft']:,.0f} sqft\n"
                 recommendations += f"• 💰 Price: ₹{prop['price']:,.0f}\n"
-                recommendations += f"• 💵 Price/sqft: ₹{prop['price']/prop['area_sqft']:,.0f}\n\n"
+                area_sqft = prop.get('area_sqft')
+                if area_sqft:
+                    recommendations += f"• 💵 Price/sqft: ₹{prop['price']/area_sqft:,.0f}\n\n"
+                else:
+                    recommendations += "• 💵 Price/sqft: N/A\n\n"
             
             return recommendations
             
@@ -362,11 +396,11 @@ class RealEstateChatbot:
             for i, (role, message, timestamp) in enumerate(st.session_state.chat_history):
                 if role == "user":
                     with st.chat_message("user"):
-                        st.write(f"**You:** {message}")
+                        st.text(message)
                         st.caption(timestamp)
                 else:
                     with st.chat_message("assistant"):
-                        st.write(f"**Assistant:** {message}")
+                        st.text(message)
                         st.caption(timestamp)
         
         # Chat input
