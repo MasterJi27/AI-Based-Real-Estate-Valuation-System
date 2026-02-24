@@ -23,19 +23,19 @@ class ProductionConfig:
         self._setup_logging()
     
     def _get_api_key(self):
-        """Get API key from multiple sources"""
+        """Get OpenRouter API key from multiple sources"""
         try:
             import streamlit as st
             # Try Streamlit secrets first
-            if hasattr(st, 'secrets') and 'GOOGLE_API_KEY' in st.secrets:
-                return st.secrets['GOOGLE_API_KEY']
+            if hasattr(st, 'secrets') and 'OPENROUTER_API_KEY' in st.secrets:
+                return st.secrets['OPENROUTER_API_KEY']
         except ImportError:
             pass
         except Exception:
             pass
         
         # Try environment variables
-        return os.getenv('GEMINI_API_KEY', '') or os.getenv('GOOGLE_API_KEY', '')
+        return os.getenv('OPENROUTER_API_KEY', '')
 
     def _load_configuration(self):
         """Load all configuration from environment variables with defaults"""

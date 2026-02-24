@@ -1,6 +1,7 @@
 import streamlit as st
 import re
 import random
+import math
 from datetime import datetime
 from typing import Dict, List, Tuple
 
@@ -143,29 +144,6 @@ class RealEstateChatbot:
         
         return 'default'
 
-    def extract_basic_info(self, user_input: str) -> Dict:
-        """Extract basic property information from user input using secure regex"""
-        details = {}
-        
-        # Use secure extraction methods
-        city = extract_safe_city(user_input)
-        if city:
-            details['city'] = city
-            
-        bhk = extract_safe_bhk(user_input)
-        if bhk:
-            details['bhk'] = bhk
-            
-        area = extract_safe_area(user_input)
-        if area:
-            details['area'] = area
-            
-        budget = extract_safe_budget(user_input)
-        if budget:
-            details['budget'] = budget
-        
-        return details
-
     def get_market_insights(self, city: str = None) -> str:
         """Get market insights for a city"""
         if self.combined_data is None or self.combined_data.empty:
@@ -179,10 +157,13 @@ class RealEstateChatbot:
                     valid_area = city_data['area_sqft'].replace(0, float('nan'))
                     avg_price_per_sqft = (city_data['price'] / valid_area).mean(skipna=True)
                     total_properties = len(city_data)
-                    
+                    avg_ppsf_display = (
+                        "N/A" if math.isnan(avg_price_per_sqft)
+                        else f"₹{avg_price_per_sqft:,.0f}"
+                    )
                     return f"""📊 **{city.title()} Market Insights:**
 - Average Property Price: ₹{avg_price:,.0f}
-- Average Price per Sqft: ₹{avg_price_per_sqft:,.0f}
+- Average Price per Sqft: {avg_ppsf_display}
 - Properties in Database: {total_properties}
 - Popular Property Types: {', '.join(city_data['property_type'].value_counts().head(3).index.tolist())}"""
                 else:
@@ -231,9 +212,12 @@ class RealEstateChatbot:
 
     def generate_response(self, user_input: str) -> str:
         """Generate chatbot response based on user input"""
+        # Validate and bound input length before any downstream processing
+        user_input = user_input.strip()[:500]
+
         intent = self.classify_intent(user_input)
         
-        # Store context
+        # Store context — use already-bounded user_input
         st.session_state.chat_context['last_intent'] = intent
         st.session_state.chat_context['last_input'] = user_input
         
@@ -265,20 +249,29 @@ class RealEstateChatbot:
             # Try to extract budget using the helper first (handles lakh/crore units)
             budget = extract_safe_budget(user_input)
             numbers = re.findall(r'\d+(?:\.\d+)?', user_input)
-            if budget is not None and len(numbers) >= 2:
+            if budget is not None and len(numbers) >= 3:
                 try:
-                    # Find rate and tenure from remaining numbers
+                    # budget already contains the principal (with lakh/crore scaling).
+                    # With at least 3 numeric tokens the last two are rate and tenure.
                     remaining = [float(n) for n in numbers]
-                    if len(remaining) >= 2:
-                        return self.calculate_quick_emi(budget, remaining[-2], remaining[-1])
+                    return self.calculate_quick_emi(budget, remaining[-2], remaining[-1])
                 except (ValueError, IndexError, TypeError):
                     pass
             if len(numbers) >= 3:
                 try:
-                    principal = float(numbers[0]) * (100000 if float(numbers[0]) < 1000 else 1)  # Assume lakhs if small number
-                    rate = float(numbers[1])
-                    tenure = float(numbers[2])
-                    return self.calculate_quick_emi(principal, rate, tenure)
+                    # Require an explicit unit keyword so we know the intended scale.
+                    unit_pattern = r'\b(lakh|lac|crore|\u20b9|rs\.?|rupees?)\b'
+                    if re.search(unit_pattern, user_input, re.IGNORECASE):
+                        principal = float(numbers[0]) * (100000 if float(numbers[0]) < 1000 else 1)
+                        rate = float(numbers[1])
+                        tenure = float(numbers[2])
+                        return self.calculate_quick_emi(principal, rate, tenure)
+                    else:
+                        return (
+                            "Please re-enter the loan amount with an explicit unit "
+                            "(e.g., '50 lakh', '1.2 crore', or '₹5000000') so I can "
+                            "determine the correct scale."
+                        )
                 except (ValueError, IndexError, TypeError):
                     pass
             return random.choice(self.responses['emi']) + " Please provide: loan amount, interest rate, and tenure in years."
@@ -303,7 +296,7 @@ class RealEstateChatbot:
                 return insights
             return "I can provide information about Mumbai, Delhi, Bangalore, Gurugram, and Noida. Which city interests you?"
         
-        elif intent == 'recommend' or intent == 'budget':
+        elif intent in ('recommend', 'budget', 'bhk', 'property_type'):
             details = self.extract_property_details(user_input)
             return self.get_property_recommendations(details)
         
@@ -347,7 +340,11 @@ class RealEstateChatbot:
                 recommendations += f"**Option {idx}:**\n"
                 recommendations += f"• 📍 Location: {prop['city']}, {prop['district']}\n"
                 recommendations += f"• 🏠 Type: {prop['bhk']} BHK {prop['property_type']}\n"
-                recommendations += f"• 📐 Area: {prop['area_sqft']:,.0f} sqft\n"
+                area_sqft_display = prop.get('area_sqft')
+                recommendations += (
+                    f"• 📐 Area: {area_sqft_display:,.0f} sqft\n"
+                    if area_sqft_display else "• 📐 Area: N/A\n"
+                )
                 recommendations += f"• 💰 Price: ₹{prop['price']:,.0f}\n"
                 area_sqft = prop.get('area_sqft')
                 if area_sqft:
@@ -396,11 +393,11 @@ class RealEstateChatbot:
             for i, (role, message, timestamp) in enumerate(st.session_state.chat_history):
                 if role == "user":
                     with st.chat_message("user"):
-                        st.text(message)
+                        st.markdown(message)
                         st.caption(timestamp)
                 else:
                     with st.chat_message("assistant"):
-                        st.text(message)
+                        st.markdown(message)
                         st.caption(timestamp)
         
         # Chat input

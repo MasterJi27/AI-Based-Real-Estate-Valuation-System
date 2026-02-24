@@ -69,6 +69,10 @@ class DataLoader:
         # Cast to float64 for ML models
         for col in ['price', 'area_sqft', 'bhk']:
             df[col] = df[col].astype(np.float64)
+        # Normalise city casing to Title Case so comparisons against the UI
+        # selectbox values ('Mumbai', 'Delhi', etc.) work correctly
+        if 'city' in df.columns:
+            df['city'] = df['city'].str.strip().str.title()
         logger.debug(f"Rows after cleaning: {len(df)}")
         return df
 

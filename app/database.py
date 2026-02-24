@@ -22,7 +22,8 @@ class DatabaseManager:
             'user': os.getenv('PGUSER', 'postgres'),
             'password': os.getenv('PGPASSWORD') or '',
             'port': os.getenv('PGPORT', '5432'),
-            'sslmode': os.getenv('PGSSLMODE', 'prefer')
+            'sslmode': os.getenv('PGSSLMODE', 'prefer'),
+            'connect_timeout': int(os.getenv('PGCONNECT_TIMEOUT', '30')),
         }
         _user = quote_plus(self.connection_params['user'])
         _pw = quote_plus(self.connection_params['password'])
@@ -111,12 +112,26 @@ class DatabaseManager:
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            # Back-fill UNIQUE constraint if the table already existed without it
+            # Back-fill UNIQUE constraint if the table already existed without it.
+            # First deduplicate any existing duplicate session_id rows (keep the latest),
+            # then add the constraint only if it does not already exist for this table.
+            cursor.execute("""
+                DELETE FROM user_analytics a
+                USING user_analytics b
+                WHERE a.id < b.id
+                  AND a.session_id IS NOT DISTINCT FROM b.session_id
+                  AND a.session_id IS NOT NULL;
+            """)
             cursor.execute("""
                 DO $$ BEGIN
                     IF NOT EXISTS (
-                        SELECT 1 FROM pg_constraint
-                        WHERE conname = 'user_analytics_session_id_key'
+                        SELECT 1
+                        FROM pg_constraint c
+                        JOIN pg_class t ON t.oid = c.conrelid
+                        JOIN pg_namespace n ON n.oid = t.relnamespace
+                        WHERE c.conname = 'user_analytics_session_id_key'
+                          AND t.relname = 'user_analytics'
+                          AND n.nspname = current_schema()
                     ) THEN
                         ALTER TABLE user_analytics ADD CONSTRAINT user_analytics_session_id_key UNIQUE (session_id);
                     END IF;
@@ -174,6 +189,8 @@ class DatabaseManager:
     
     def load_properties_to_db(self, df: pd.DataFrame):
         """Load property data from DataFrame to database"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -198,17 +215,22 @@ class DatabaseManager:
             """, data_tuples)
             
             conn.commit()
-            cursor.close()
-            conn.close()
             return True
             
         except Exception as e:
             logger.error(f"Error loading properties to database: {str(e)}")
             return False
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def save_prediction(self, session_id: str, property_data: Dict, predictions: Dict, 
                        ensemble_prediction: float, investment_advice: str):
         """Save prediction results to database"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -235,16 +257,21 @@ class DatabaseManager:
             ))
             
             conn.commit()
-            cursor.close()
-            conn.close()
             return True
             
         except Exception as e:
             logger.error(f"Error saving prediction: {str(e)}")
             return False
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def get_user_analytics(self, session_id: str) -> Dict:
         """Get user analytics data"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -257,8 +284,6 @@ class DatabaseManager:
             """, (session_id,))
             
             result = cursor.fetchone()
-            cursor.close()
-            conn.close()
             
             if result:
                 return {
@@ -274,6 +299,11 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error getting user analytics: {str(e)}")
             return {}
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def create_user_analytics(self, session_id: str) -> Dict:
         """Create new user analytics record"""
@@ -313,7 +343,7 @@ class DatabaseManager:
                 conn.close()
     
     def update_user_analytics(self, session_id: str, increment_predictions: bool = False,
-                            favorite_city: str = None, avg_price: float = None):
+                            favorite_city: Optional[str] = None, avg_price: Optional[float] = None):
         """Update user analytics — all changes in a single UPDATE to avoid race conditions"""
         conn = None
         try:
@@ -355,6 +385,8 @@ class DatabaseManager:
     
     def get_prediction_history(self, session_id: str, limit: int = 10) -> List[Dict]:
         """Get user's prediction history"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -371,8 +403,6 @@ class DatabaseManager:
             """, (session_id, limit))
             
             results = cursor.fetchall()
-            cursor.close()
-            conn.close()
             
             history = []
             for row in results:
@@ -394,9 +424,16 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error getting prediction history: {str(e)}")
             return []
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def get_market_statistics(self) -> Dict:
         """Get overall market statistics"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -436,9 +473,6 @@ class DatabaseManager:
             
             property_types = cursor.fetchall()
             
-            cursor.close()
-            conn.close()
-            
             return {
                 'city_statistics': [
                     {
@@ -467,6 +501,11 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error getting market statistics: {str(e)}")
             return {}
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def save_search(self, session_id: str, search_name: str, filters: Dict):
         """Save user search preferences"""
@@ -509,6 +548,8 @@ class DatabaseManager:
     
     def get_saved_searches(self, session_id: str) -> List[Dict]:
         """Get user's saved searches"""
+        conn = None
+        cursor = None
         try:
             conn = self.get_connection()
             if conn is None:
@@ -524,8 +565,6 @@ class DatabaseManager:
             """, (session_id,))
             
             results = cursor.fetchall()
-            cursor.close()
-            conn.close()
             
             searches = []
             for row in results:
@@ -550,6 +589,11 @@ class DatabaseManager:
         except Exception as e:
             logger.error(f"Error getting saved searches: {str(e)}")
             return []
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
     
     def get_properties_by_filters(self, filters: Dict) -> pd.DataFrame:
         """Get properties matching filters"""
@@ -558,73 +602,54 @@ class DatabaseManager:
             return self._get_properties_from_csv_with_filters(filters)
         
         try:
-            conn = self.get_connection()
-            if conn is None:
-                return self._get_properties_from_csv_with_filters(filters)
-                
-            cursor = conn.cursor()
-            
-            # Build dynamic query
-            where_conditions = []
-            params = []
-            
+            # Build dynamic query and execute via SQLAlchemy engine (no separate psycopg2 needed)
+            where_conditions: list = []
+            params: list = []
+
             if filters.get('city'):
                 where_conditions.append("city = %s")
                 params.append(filters['city'])
-            
             if filters.get('district'):
                 where_conditions.append("district = %s")
                 params.append(filters['district'])
-            
             if filters.get('min_area'):
                 where_conditions.append("area_sqft >= %s")
                 params.append(filters['min_area'])
-            
             if filters.get('max_area'):
                 where_conditions.append("area_sqft <= %s")
                 params.append(filters['max_area'])
-            
             if filters.get('min_bhk'):
                 where_conditions.append("bhk >= %s")
                 params.append(filters['min_bhk'])
-            
             if filters.get('max_bhk'):
                 where_conditions.append("bhk <= %s")
                 params.append(filters['max_bhk'])
-            
             if filters.get('property_type'):
                 where_conditions.append("property_type = %s")
                 params.append(filters['property_type'])
-            
             if filters.get('furnishing'):
                 where_conditions.append("furnishing = %s")
                 params.append(filters['furnishing'])
-            
             if filters.get('min_price'):
                 where_conditions.append("price >= %s")
                 params.append(filters['min_price'])
-            
             if filters.get('max_price'):
                 where_conditions.append("price <= %s")
                 params.append(filters['max_price'])
-            
+
             where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
-            
+
             query = f"""
                 SELECT city, district, sub_district, area_sqft, bhk, property_type, furnishing, price
-                FROM properties 
+                FROM properties
                 WHERE {where_clause}
                 ORDER BY price DESC
                 LIMIT 100
             """
-            
+
             df = pd.read_sql_query(query, self._engine, params=params)
-            
-            cursor.close()
-            conn.close()
-            
             return df
-            
+
         except Exception as e:
             logger.error(f"Error getting filtered properties: {str(e)}")
             # Fall back to CSV data on database error
@@ -677,7 +702,10 @@ class DatabaseManager:
             result_columns = ['city', 'district', 'sub_district', 'area_sqft', 'bhk', 'property_type', 'furnishing', 'price']
             available_columns = [col for col in result_columns if col in filtered_data.columns]
             
-            result = filtered_data[available_columns].sort_values('price', ascending=False).head(100)
+            if 'price' in available_columns:
+                result = filtered_data[available_columns].sort_values('price', ascending=False).head(100)
+            else:
+                result = filtered_data[available_columns].head(100)
             
             return result
             

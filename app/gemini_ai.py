@@ -137,7 +137,7 @@ Provide: 1) Market conditions 2) Price trends 3) Supply/demand 4) Infrastructure
 
 
 def get_cached_market_analysis(city: str, property_type: str = None) -> str:
-    """Get cached market analysis — caller must supply the service instance."""
+    """Get cached market analysis by calling get_gemini_service() internally to acquire the service instance."""
     service = get_gemini_service()
     if service is None:
         return "AI service not initialized"

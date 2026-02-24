@@ -57,14 +57,23 @@ class LoanEligibilityCalculator:
     
     def calculate_emi(self, principal, interest_rate, tenure_years):
         """Calculate EMI using formula"""
-        monthly_rate = interest_rate / (12 * 100)
-        tenure_months = tenure_years * 12
-        
-        if monthly_rate == 0:
-            return principal / tenure_months if tenure_months > 0 else 0
-        
-        emi = principal * monthly_rate * (1 + monthly_rate)**tenure_months / ((1 + monthly_rate)**tenure_months - 1)
-        return emi
+        if not (isinstance(principal, (int, float)) and principal > 0):
+            raise ValueError("principal must be a positive number")
+        if not (isinstance(interest_rate, (int, float)) and interest_rate >= 0):
+            raise ValueError("interest_rate must be non-negative")
+        if not (isinstance(tenure_years, (int, float)) and tenure_years > 0):
+            raise ValueError("tenure_years must be a positive number")
+        try:
+            monthly_rate = interest_rate / (12 * 100)
+            tenure_months = tenure_years * 12
+            
+            if monthly_rate == 0:
+                return principal / tenure_months
+            
+            emi = principal * monthly_rate * (1 + monthly_rate)**tenure_months / ((1 + monthly_rate)**tenure_months - 1)
+            return emi
+        except ZeroDivisionError as exc:
+            raise ValueError(f"EMI calculation error: {exc}") from exc
     
     def check_eligibility(self, property_value, monthly_income, existing_emi, tenure_years, 
                          bank_name, applicant_age, employment_type, credit_score):
@@ -92,11 +101,12 @@ class LoanEligibilityCalculator:
             monthly_income, applicant_age, employment_type, credit_score, criteria
         )
         
-        # Adjust eligible amount based on ALL eligibility factors
-        for factor, multiplier in eligibility_factors.items():
+        # Adjust eligible amount based on ALL eligibility factors.
+        # Clamp to zero minimum and the hard LTV cap only; do not re-clamp to
+        # max_loan_by_income so that positive eligibility-factor boosts can take effect.
+        for _factor, multiplier in eligibility_factors.items():
             eligible_amount *= multiplier
-        eligible_amount = max(0, eligible_amount)
-        
+        eligible_amount = max(0, min(eligible_amount, max_loan_by_ltv))        
         # Calculate EMI for eligible amount
         actual_emi = self.calculate_emi(eligible_amount, criteria['interest_rate'], tenure_years)
         processing_fee = eligible_amount * criteria['processing_fee']
@@ -116,14 +126,23 @@ class LoanEligibilityCalculator:
     
     def calculate_principal_from_emi(self, emi, interest_rate, tenure_years):
         """Calculate principal amount from EMI"""
-        monthly_rate = interest_rate / (12 * 100)
-        tenure_months = tenure_years * 12
-        
-        if monthly_rate == 0:
-            return emi * tenure_months
-        
-        principal = emi * ((1 + monthly_rate)**tenure_months - 1) / (monthly_rate * (1 + monthly_rate)**tenure_months)
-        return principal
+        if not (isinstance(emi, (int, float)) and emi > 0):
+            raise ValueError("emi must be a positive number")
+        if not (isinstance(interest_rate, (int, float)) and interest_rate >= 0):
+            raise ValueError("interest_rate must be non-negative")
+        if not (isinstance(tenure_years, (int, float)) and tenure_years > 0):
+            raise ValueError("tenure_years must be a positive number")
+        try:
+            monthly_rate = interest_rate / (12 * 100)
+            tenure_months = tenure_years * 12
+            
+            if monthly_rate == 0:
+                return emi * tenure_months
+            
+            principal = emi * ((1 + monthly_rate)**tenure_months - 1) / (monthly_rate * (1 + monthly_rate)**tenure_months)
+            return principal
+        except ZeroDivisionError as exc:
+            raise ValueError(f"Principal calculation error: {exc}") from exc
     
     def check_additional_criteria(self, monthly_income, age, employment_type, credit_score, criteria):
         """Check additional eligibility factors"""
@@ -193,8 +212,18 @@ class TaxCalculator:
         
         tax_config = self.tax_rates.get(state, self.tax_rates['Maharashtra'])
         
-        # Calculate Annual Rental Value (ARV)
-        arv = property_value * 0.08  # Assuming 8% of market value as rental value
+        # Area-based factor: larger built-up areas attract proportionally more ARV
+        if built_up_area <= 500:
+            area_factor = 0.85
+        elif built_up_area <= 1000:
+            area_factor = 1.0
+        elif built_up_area <= 2000:
+            area_factor = 1.10
+        else:
+            area_factor = 1.20
+        
+        # Calculate Annual Rental Value (ARV) adjusted for built-up area
+        arv = property_value * 0.08 * area_factor  # 8% of market value, scaled by area slab
         
         # Base property tax
         base_tax = arv * tax_config['property_tax_rate']
@@ -226,7 +255,10 @@ class TaxCalculator:
             'tax_breakdown': {
                 'Base Property Tax': base_tax,
                 'Additional Charges': additional_charges,
-                'Type Multiplier': f"{multiplier}x for {property_type}"
+            },
+            'factors': {
+                'multiplier': multiplier,
+                'multiplier_description': f"{multiplier:.1f}x for {property_type}",
             }
         }
     
@@ -308,7 +340,15 @@ class RegistrationCostCalculator:
         # Legal and documentation charges
         legal_charges = property_value * 0.005  # 0.5% for legal verification
         
-        total_cost = stamp_duty + registration_fee + sum(additional_costs.values()) + legal_charges
+        # Property-type surcharge (commercial and industrial attract an additional levy)
+        type_surcharges = {
+            'Residential': 0.0,
+            'Commercial': 0.01,   # 1 % additional
+            'Industrial': 0.015,  # 1.5 % additional
+        }
+        type_surcharge = property_value * type_surcharges.get(property_type, 0.0)
+        
+        total_cost = stamp_duty + registration_fee + sum(additional_costs.values()) + legal_charges + type_surcharge
         
         return {
             'stamp_duty': stamp_duty,
@@ -321,6 +361,7 @@ class RegistrationCostCalculator:
                 'Stamp Duty': stamp_duty,
                 'Registration Fee': registration_fee,
                 'Legal Charges': legal_charges,
+                'Type Surcharge': type_surcharge,
                 **additional_costs
             }
         }
@@ -557,15 +598,22 @@ class PropertyAppreciationTracker:
             'optimistic': avg_appreciation + volatility
         }
         
-        # Calculate year-by-year projections
+        # Calculate year-by-year projections.
+        # Use a deterministic seed so results are reproducible for the same inputs.
+        seed = abs(hash((round(current_value), location, round(volatility, 4), forecast_years))) % (2 ** 31)
+        rng = np.random.RandomState(seed)
+
         projections = {}
         for scenario, rate in forecasts.items():
             yearly_values = []
             value = current_value
             
             for year in range(1, forecast_years + 1):
-                # Add some randomness for realistic projections
-                annual_rate = rate + np.random.normal(0, volatility * 0.3)
+                # Only add noise for the realistic scenario; conservative/optimistic are deterministic
+                if scenario == 'realistic':
+                    annual_rate = rate + rng.normal(0, volatility * 0.3)
+                else:
+                    annual_rate = rate
                 value = value * (1 + annual_rate / 100)
                 yearly_values.append({
                     'year': year,
@@ -574,6 +622,20 @@ class PropertyAppreciationTracker:
                 })
             
             projections[scenario] = yearly_values
+        
+        # Enforce ordering: clamp realistic values between conservative and optimistic per year
+        if all(k in projections for k in ('conservative', 'realistic', 'optimistic')):
+            for year_idx in range(forecast_years):
+                con_val = projections['conservative'][year_idx]['value']
+                opt_val = projections['optimistic'][year_idx]['value']
+                real_val = projections['realistic'][year_idx]['value']
+                clamped = max(con_val, min(real_val, opt_val))
+                if clamped != real_val:
+                    projections['realistic'][year_idx] = {
+                        **projections['realistic'][year_idx],
+                        'value': clamped,
+                        'appreciation': ((clamped - current_value) / current_value) * 100 if current_value > 0 else 0,
+                    }
         
         return {
             'current_value': current_value,
@@ -736,7 +798,7 @@ def render_loan_eligibility():
                     st.write("**Eligibility Factors:**")
                     for factor, multiplier in result['eligibility_factors'].items():
                         color = "green" if multiplier > 1.0 else "red" if multiplier < 1.0 else "blue"
-                        st.write(f"• {factor}: {multiplier:.1f}x", unsafe_allow_html=True)
+                        st.markdown(f"• <span style='color:{color}'>{factor}: {multiplier:.1f}x</span>", unsafe_allow_html=True)
             
             # EMI vs Income chart
             fig = go.Figure(data=[

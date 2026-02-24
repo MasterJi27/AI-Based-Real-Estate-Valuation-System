@@ -189,20 +189,21 @@ def load_data_and_model():
         return False
 
 def initialize_gemini_ai():
-    """Initialize Gemini AI service"""
+    """Initialize OpenRouter AI service"""
     if not st.session_state.gemini_initialized and config.AI_CONFIG.get('enable_gemini_ai', False):
         try:
-            with st.spinner("Initializing Gemini AI..."):
-                api_key = config.AI_CONFIG.get('gemini_api_key')
-                if api_key:
-                    st.session_state.gemini_service = initialize_gemini_service(api_key)
-                    st.session_state.gemini_initialized = True
-                    st.success("✅ Gemini AI initialized successfully")
-                else:
-                    st.warning("⚠️ Gemini API key not configured")
+            with st.spinner("Initializing AI service..."):
+                # Pass the key from config; GeminiAIService will also auto-read
+                # OPENROUTER_API_KEY from env if api_key is falsy.
+                api_key = config.AI_CONFIG.get('gemini_api_key') or None
+                st.session_state.gemini_service = initialize_gemini_service(api_key)
+                st.session_state.gemini_initialized = True
+        except ValueError:
+            # Key genuinely missing — surface a helpful message but don't crash
+            st.session_state.gemini_initialized = False
         except Exception as e:
-            st.error(f"❌ Failed to initialize Gemini AI: {str(e)}")
-            error_handler.handle_data_error(e, "Gemini AI initialization failed")
+            st.error(f"❌ Failed to initialize AI service: {str(e)}")
+            error_handler.handle_data_error(e, "AI service initialization failed")
 
 def main():
     # Security check - rate limiting
@@ -239,7 +240,7 @@ def main():
                 st.json(metrics)
     
     # Navigation tabs
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["🔮 Price Prediction", "📊 Property Valuation", "💼 Investment Analysis", "💰 Financial Tools", "📚 Knowledge Center", "🤖 AI Assistant", "🧠 Gemini AI Insights"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(["🔮 Price Prediction", "📊 Property Valuation", "💼 Investment Analysis", "💰 Financial Tools", "📚 Knowledge Center", "🤖 AI Assistant", "🧠 AI Insights"])
     
     with tab1:
         price_prediction_interface()
@@ -260,13 +261,13 @@ def main():
         ai_assistant_interface()
     
     with tab7:
-        st.header("🧠 Gemini AI Insights")
-        st.markdown("### Advanced Real Estate Intelligence powered by Google Gemini 2.5")
+        st.header("🧠 AI Insights")
+        st.markdown("### Advanced Real Estate Intelligence powered by OpenRouter")
         
-        # Check if Gemini AI is available
+        # Check if AI service is available
         gemini_service = get_gemini_service()
         if not gemini_service:
-            st.warning("⚠️ Gemini AI is not available. Please check configuration.")
+            st.warning("⚠️ OpenRouter AI is not available. Add **OPENROUTER_API_KEY** to your `.env` file or Streamlit secrets, then click Retry.")
             if st.button("🔄 Retry Initialization"):
                 initialize_gemini_ai()
                 st.rerun()
