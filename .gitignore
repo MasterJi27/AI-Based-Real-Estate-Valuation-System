@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Environment
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec
+launcher.py
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ML model artifacts
+*.pkl
+*.joblib
+*.h5
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage

@@ -6,6 +6,10 @@ import logging
 from datetime import datetime
 import json
 from typing import Optional, Dict, List, Any
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -17,7 +21,8 @@ class DatabaseManager:
             'database': os.getenv('PGDATABASE', 'realestate'),
             'user': os.getenv('PGUSER', 'postgres'),
             'password': os.getenv('PGPASSWORD', 'password'),
-            'port': os.getenv('PGPORT', '5432')
+            'port': os.getenv('PGPORT', '5432'),
+            'sslmode': os.getenv('PGSSLMODE', 'prefer')
         }
         self.connection_available = False
         self.init_database()

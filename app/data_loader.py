@@ -1,41 +1,51 @@
 import pandas as pd
 import numpy as np
 import logging
-from pathlib import Path
+import os
+from sqlalchemy import create_engine, text
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Setup logging
 logger = logging.getLogger(__name__)
 
 class DataLoader:
     def __init__(self):
-        # Get the current directory and construct the datasets path
-        current_dir = Path(__file__).parent
-        self.datasets_path = current_dir / 'datasets'
+        user = os.getenv('PGUSER')
+        password = os.getenv('PGPASSWORD')
+        host = os.getenv('PGHOST')
+        port = os.getenv('PGPORT', '5432')
+        database = os.getenv('PGDATABASE')
+        self._engine = create_engine(
+            f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}",
+            connect_args={'sslmode': 'require', 'connect_timeout': 30}
+        )
 
     def load_city_data(self, city):
-        file_path = self.datasets_path / f"{city.lower()}_properties.csv"
-        if not file_path.exists():
-            logger.info(f"Data file not found for {city}: {file_path}")
+        try:
+            with self._engine.connect() as conn:
+                df = pd.read_sql(
+                    text("SELECT * FROM property_listings WHERE LOWER(city)=:city"),
+                    conn, params={'city': city.lower()}
+                )
+            df['city'] = city
+            df = self._clean_data(df)
+            logger.info(f"{city}: Loaded {len(df)} rows from Neon.")
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load {city} from Neon: {e}")
             return pd.DataFrame()
-        df = pd.read_csv(file_path)
-        df['city'] = city  # Add city column for consistency
-        df = self._clean_data(df)
-        logger.info(f"{city}: Loaded {len(df)} valid rows.")
-        return df
 
     def load_all_data(self):
-        cities = ['Mumbai', 'Delhi', 'Gurugram', 'Noida', 'Bangalore']
-        all_data = []
-        for city in cities:
-            df = self.load_city_data(city)
-            if not df.empty:
-                all_data.append(df)
-        if all_data:
-            combined_data = pd.concat(all_data, ignore_index=True)
-            logger.info(f"Total valid rows loaded: {len(combined_data)}")
-            return combined_data
-        else:
-            logger.info("No valid data found. Please ensure CSV files are properly formatted.")
+        try:
+            with self._engine.connect() as conn:
+                df = pd.read_sql(text("SELECT * FROM property_listings"), conn)
+            df = self._clean_data(df)
+            logger.info(f"Total rows loaded from Neon: {len(df)}")
+            return df
+        except Exception as e:
+            logger.error(f"Failed to load data from Neon: {e}")
             return pd.DataFrame()
 
     def _clean_data(self, df):
